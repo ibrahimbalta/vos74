@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, MessageCircle } from 'lucide-react';
+import { db, seedDatabaseIfEmpty } from './firebase';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ParticleBackground from './components/ParticleBackground';
@@ -318,18 +320,14 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   
   // Core States
-  const [appointments, setAppointments] = useState(initialAppointments);
+  const [appointments, setAppointments] = useState([]);
   const [workingHours, setWorkingHours] = useState(['09:00', '10:00', '11:00', '13:30', '14:30', '15:30', '16:30']);
-  const [activeRepairs, setActiveRepairs] = useState(initialActiveRepairs);
-  const [completedRepairs, setCompletedRepairs] = useState([
-    { plate: '74 VS 074', model: 'Volkswagen Golf 7 2017', date: '12.01.2026', desc: 'DSG Kavrama Değişimi & Şanzıman Bakımı', cost: 14500, master: 'Nuri Usta' },
-    { plate: '74 VS 074', model: 'Volkswagen Golf 7 2017', date: '15.08.2025', desc: 'Ön/Arka VAG Orijinal Balata Değişimi', cost: 2850, master: 'Nuri Usta' },
-    { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '04.03.2026', desc: 'Triger Seti & Devridaim değişimi ve antifriz yenileme', cost: 7200, master: 'Nuri Usta' },
-    { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '10.10.2025', desc: 'ODIS Detaylı Arıza okuma, lambda sensörü değişimi', cost: 1600, master: 'Selim Usta' }
-  ]);
-  const [listings, setListings] = useState(initialListings);
+  const [activeRepairs, setActiveRepairs] = useState([]);
+  const [completedRepairs, setCompletedRepairs] = useState([]);
+  const [listings, setListings] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [prefilledAppointment, setPrefilledAppointment] = useState(null);
+  const [loading, setLoading] = useState(true);
  
   // Dynamic homepage contents state
   const [branchDetails, setBranchDetails] = useState(initialBranchDetails);
@@ -339,7 +337,7 @@ function App() {
   const [beforeAfterData, setBeforeAfterData] = useState({
     beforeImage: '/before_engine.png',
     afterImage: '/after_engine.png',
-    description: "85.000 Km'deki Volkswagen Golf motorunun detaylı arıza giderimi, sızıntı temizliği ve motor koruma pasta-detay işlemi."
+    description: "85.000 Km'deki Volkswagen Golf motorunun detaylı arıza giderimi, sızıntı temizliği motor koruma pasta-detay işlemi."
   });
   const [socialLinks, setSocialLinks] = useState({
     instagram: 'https://www.instagram.com/bartinotoservis/',
@@ -349,6 +347,78 @@ function App() {
     tiktok: ''
   });
 
+  // Load and seed Firestore database
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const initialData = {
+          socialLinks: {
+            instagram: 'https://www.instagram.com/bartinotoservis/',
+            facebook: '',
+            youtube: '',
+            whatsapp: 'https://wa.me/905326373978',
+            tiktok: ''
+          },
+          beforeAfterData: {
+            beforeImage: '/before_engine.png',
+            afterImage: '/after_engine.png',
+            description: "85.000 Km'deki Volkswagen Golf motorunun detaylı arıza giderimi, sızıntı temizliği motor koruma pasta-detay işlemi."
+          },
+          workingHours: ['09:00', '10:00', '11:00', '13:30', '14:30', '15:30', '16:30'],
+          team: initialTeam,
+          branchDetails: initialBranchDetails,
+          appointments: initialAppointments,
+          activeRepairs: initialActiveRepairs,
+          completedRepairs: [
+            { plate: '74 VS 074', model: 'Volkswagen Golf 7 2017', date: '12.01.2026', desc: 'DSG Kavrama Değişimi & Şanzıman Bakımı', cost: 14500, master: 'Nuri Usta' },
+            { plate: '74 VS 074', model: 'Volkswagen Golf 7 2017', date: '15.08.2025', desc: 'Ön/Arka VAG Orijinal Balata Değişimi', cost: 2850, master: 'Nuri Usta' },
+            { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '04.03.2026', desc: 'Triger Seti & Devridaim değişimi ve antifriz yenileme', cost: 7200, master: 'Nuri Usta' },
+            { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '10.10.2025', desc: 'ODIS Detaylı Arıza okuma, lambda sensörü değişimi', cost: 1600, master: 'Selim Usta' }
+          ],
+          listings: initialListings
+        };
+
+        // Seed data if database is fresh/empty
+        await seedDatabaseIfEmpty(initialData);
+
+        // Fetch settings document
+        const settingsSnap = await getDoc(doc(db, "settings", "general"));
+        if (settingsSnap.exists()) {
+          const settings = settingsSnap.data();
+          if (settings.socialLinks) setSocialLinks(settings.socialLinks);
+          if (settings.beforeAfterData) setBeforeAfterData(settings.beforeAfterData);
+          if (settings.workingHours) setWorkingHours(settings.workingHours);
+          if (settings.team) setTeam(settings.team);
+          if (settings.branchDetails) setBranchDetails(settings.branchDetails);
+        }
+
+        // Fetch dynamic lists
+        const fetchCol = async (colName) => {
+          const snap = await getDocs(collection(db, colName));
+          return snap.docs.map(doc => doc.data());
+        };
+
+        const apts = await fetchCol("appointments");
+        if (apts.length > 0) setAppointments(apts);
+
+        const active = await fetchCol("activeRepairs");
+        if (active.length > 0) setActiveRepairs(active);
+
+        const completed = await fetchCol("completedRepairs");
+        if (completed.length > 0) setCompletedRepairs(completed);
+
+        const list = await fetchCol("listings");
+        if (list.length > 0) setListings(list);
+
+      } catch (error) {
+        console.error("Firestore database loading failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
   // Dynamic details based on current selected branch
   const activeBranchInfo = branchDetails[branch];
 
@@ -357,21 +427,87 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
 
+  // Settings custom state handlers that sync with Firestore in background
+  const handleSetBranchDetails = async (valOrFunc) => {
+    setBranchDetails(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { branchDetails: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetTeam = async (valOrFunc) => {
+    setTeam(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { team: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetTestimonials = async (valOrFunc) => {
+    setTestimonials(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { testimonials: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetGalleryItems = async (valOrFunc) => {
+    setGalleryItems(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { galleryItems: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetBeforeAfterData = async (valOrFunc) => {
+    setBeforeAfterData(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { beforeAfterData: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetSocialLinks = async (valOrFunc) => {
+    setSocialLinks(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { socialLinks: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
   // Appointment Actions
-  const addAppointment = (newApt) => {
+  const addAppointment = async (newApt) => {
     setAppointments([newApt, ...appointments]);
+    try {
+      await setDoc(doc(db, "appointments", newApt.id), newApt);
+    } catch (e) {
+      console.error("Firestore addAppointment failed:", e);
+    }
   };
 
-  const addWorkingHour = (hour) => {
+  const addWorkingHour = async (hour) => {
     if (!hour || workingHours.includes(hour)) return;
-    setWorkingHours([...workingHours, hour].sort((a, b) => a.localeCompare(b)));
+    const updated = [...workingHours, hour].sort((a, b) => a.localeCompare(b));
+    setWorkingHours(updated);
+    try {
+      await updateDoc(doc(db, "settings", "general"), { workingHours: updated });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const deleteWorkingHour = (hour) => {
-    setWorkingHours(workingHours.filter(h => h !== hour));
+  const deleteWorkingHour = async (hour) => {
+    const updated = workingHours.filter(h => h !== hour);
+    setWorkingHours(updated);
+    try {
+      await updateDoc(doc(db, "settings", "general"), { workingHours: updated });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const approveAppointment = (id) => {
+  const approveAppointment = async (id) => {
     const targetApt = appointments.find(a => a.id === id);
     if (!targetApt) return;
 
@@ -393,57 +529,115 @@ function App() {
 
     setActiveRepairs([newRepair, ...activeRepairs]);
     alert(`Randevu onaylandı! Araç (${targetApt.plate}) Aktif İşler Panosu'na kabul aşaması ile eklendi.`);
+
+    try {
+      await updateDoc(doc(db, "appointments", id), { status: 'approved' });
+      await setDoc(doc(db, "activeRepairs", String(newRepair.id)), newRepair);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const rejectAppointment = (id) => {
+  const rejectAppointment = async (id) => {
     setAppointments(appointments.map(a => a.id === id ? { ...a, status: 'rejected' } : a));
     alert('Randevu reddedildi/iptal edildi.');
+    try {
+      await updateDoc(doc(db, "appointments", id), { status: 'rejected' });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Active Repairs Actions
-  const updateRepairStatus = (id, newStatus) => {
-    setActiveRepairs(activeRepairs.map(car => 
+  const updateRepairStatus = async (id, newStatus) => {
+    const updatedRepairs = activeRepairs.map(car => 
       car.id === id ? { ...car, status: newStatus, deliveryTime: newStatus === 'hazir' ? 'Teslime Hazır' : car.deliveryTime } : car
-    ));
+    );
+    setActiveRepairs(updatedRepairs);
+    
+    const targetCar = updatedRepairs.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const addRepairJob = (id, newJobText, cost) => {
-    setActiveRepairs(activeRepairs.map(car => 
+  const addRepairJob = async (id, newJobText, cost) => {
+    const updated = activeRepairs.map(car => 
       car.id === id ? { 
         ...car, 
         jobsDone: [...car.jobsDone, { name: newJobText, cost: Number(cost) || 0 }] 
       } : car
-    ));
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const deleteRepairJob = (id, jobIndex) => {
-    setActiveRepairs(activeRepairs.map(car => 
+  const deleteRepairJob = async (id, jobIndex) => {
+    const updated = activeRepairs.map(car => 
       car.id === id ? { 
         ...car, 
         jobsDone: car.jobsDone.filter((_, idx) => idx !== jobIndex) 
       } : car
-    ));
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const updateRepairJobCost = (id, jobIndex, newCost) => {
-    setActiveRepairs(activeRepairs.map(car => 
+  const updateRepairJobCost = async (id, jobIndex, newCost) => {
+    const updated = activeRepairs.map(car => 
       car.id === id ? { 
         ...car, 
         jobsDone: car.jobsDone.map((job, idx) => 
           idx === jobIndex ? { ...job, cost: Number(newCost) || 0 } : job
         ) 
       } : car
-    ));
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const addPendingRequest = (id, itemName, cost) => {
-    setActiveRepairs(activeRepairs.map(car => 
+  const addPendingRequest = async (id, itemName, cost) => {
+    const updated = activeRepairs.map(car => 
       car.id === id ? { ...car, pendingApproval: { item: itemName, cost: cost } } : car
-    ));
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const addExtraCostApproval = (id, cost, itemName) => {
-    setActiveRepairs(activeRepairs.map(car => {
+  const addExtraCostApproval = async (id, cost, itemName) => {
+    const updated = activeRepairs.map(car => {
       if (car.id === id) {
         return {
           ...car,
@@ -452,10 +646,19 @@ function App() {
         };
       }
       return car;
-    }));
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
-  const completeRepairJob = (id) => {
+  const completeRepairJob = async (id) => {
     const targetCar = activeRepairs.find(c => c.id === id);
     if (!targetCar) return;
 
@@ -475,12 +678,36 @@ function App() {
     setActiveRepairs(activeRepairs.filter(c => c.id !== id));
     setCompletedRepairs([historyRecord, ...completedRepairs]);
     alert(`${targetCar.plate} plakalı aracın işlemleri tamamlandı ve müşteri geçmişine kaydedildi.`);
+
+    try {
+      await deleteDoc(doc(db, "activeRepairs", String(id)));
+      await addDoc(collection(db, "completedRepairs"), historyRecord);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Marketplace Actions
-  const addMarketplaceListing = (newListing) => {
+  const addMarketplaceListing = async (newListing) => {
     setListings([newListing, ...listings]);
+    try {
+      await setDoc(doc(db, "listings", String(newListing.id)), newListing);
+    } catch (e) {
+      console.error(e);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="app-loader-container">
+        <div className="app-loader-card glass">
+          <div className="neon-spinner"></div>
+          <h2>Vos74 Veritabanı Yükleniyor...</h2>
+          <p>Lütfen bekleyiniz, veriler güvenli bir şekilde senkronize ediliyor.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`app-container ${activeBranchInfo.themeClass} theme-palette-${colorTheme}`}>
@@ -592,17 +819,17 @@ function App() {
               
               // CMS States & Setters
               branchDetails={branchDetails}
-              setBranchDetails={setBranchDetails}
+              setBranchDetails={handleSetBranchDetails}
               team={team}
-              setTeam={setTeam}
+              setTeam={handleSetTeam}
               testimonials={testimonials}
-              setTestimonials={setTestimonials}
+              setTestimonials={handleSetTestimonials}
               galleryItems={galleryItems}
-              setGalleryItems={setGalleryItems}
+              setGalleryItems={handleSetGalleryItems}
               beforeAfterData={beforeAfterData}
-              setBeforeAfterData={setBeforeAfterData}
+              setBeforeAfterData={handleSetBeforeAfterData}
               socialLinks={socialLinks}
-              setSocialLinks={setSocialLinks}
+              setSocialLinks={handleSetSocialLinks}
               currentBranch={branch}
               onLogout={() => setIsAuthenticated(false)}
             />
