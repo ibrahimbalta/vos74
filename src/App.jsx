@@ -18,6 +18,7 @@ import Appointment from './components/Appointment';
 import Marketplace from './components/Marketplace';
 import UstaDashboard from './components/UstaDashboard';
 import Login from './components/Login';
+import Blog from './components/Blog';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -232,6 +233,29 @@ const initialListings = [
   }
 ];
 
+const initialBlogs = [
+  {
+    id: 'blog-1',
+    title: 'DSG Şanzıman Ömrünü Uzatmanın 5 Altın Kuralı',
+    summary: 'Çift kavramalı DSG şanzımanlarda ısınma, kavrama aşınması ve mekatronik arızalarını önlemek için dikkat etmeniz gereken sürüş teknikleri.',
+    content: 'Volkswagen grubunun çift kavramalı şanzıman sistemi olan DSG (Direct Shift Gearbox), hızlı vites geçişleri ve yüksek yakıt ekonomisi sunar. Ancak doğru kullanılmadığında erken aşınma, mekatronik arızaları veya kavrama bitmesi gibi masraflı problemler çıkarabilir. İşte DSG şanzımanınızın ömrünü iki katına çıkaracak 5 hayati kural:\n\n1. Sıkışık Trafikte Manuel veya Spor Moda Geçin:\nDur-kalk trafikte DSG sürekli 1. ve 2. vitesler arasında geçiş yaparak kavramayı ısıtır. Aracı manuel (M) veya spor (S) moda alarak sürekli vites değiştirmesini engelleyin.\n\n2. Rampada Dururken Freni Tam Bırakmayın ve Yarım Debriyaj Yapmayın:\nYokuşlarda dur-kalk yaparken fren pedalına tam basın. Hafif basıldığında şanzıman kavramayı hazırda bekletir ve balataları aşındırır.\n\n3. Park Ederken Yükü Şanzımana Değil El Frenine Bırakın:\nPark ederken sırasıyla: Vitesi boşa (N) alın, el frenini çekin, ayağınızı fren pedalından çekip yükün el frenine binmesini sağlayın, ardından vitesi Park (P) konumuna alın.\n\n4. Araç Tam Durmadan Vites Değiştirmeyin:\nD konumundan R konumuna (veya tersi) geçerken aracın tamamen durmuş olduğundan emin olun. Hareket halindeyken yapılan geçişler dişlilere ciddi zarar verir.\n\n5. Periyodik Şanzıman Yağı Bakımını İhmal Etmeyin:\nHer 60.000 km veya 4 yılda bir DSG şanzıman yağı ve filtresinin orijinal VAG onaylı yağlarla değiştirilmesi hayati önem taşır.',
+    image: '/obd_bg.png',
+    date: '04.06.2026',
+    author: 'Vos74 Kadir Usta',
+    category: 'Şanzıman'
+  },
+  {
+    id: 'blog-2',
+    title: 'VAG Grubu Araçlarda Periyodik Bakımın Önemi',
+    summary: 'Volkswagen, Audi, Seat ve Skoda araçlarda periyodik bakım aralıkları, kullanılan yağ kalitesi ve motor sağlığı için kritik kontroller.',
+    content: 'TSI, TDI ve TFSI motorlar yüksek performans ve verimlilik sunan hassas mühendislik ürünleridir. Bu motorların uzun ömürlü olması doğrudan düzenli ve doğru bakıma bağlıdır. \n\nNeden Orijinal Onaylı Yağ?\nVAG grubu motorlarda kullanılan motor yağının viskozitesi (örn: 5W-30) kadar VAG onay kodu da (örn: VW 504 00 / 507 00) önemlidir. Yanlış yağ kullanımı partikül filtresinin (DPF) tıkanmasına, turbo milinin aşınmasına ve motor yatak sarmasına neden olabilir.\n\nBakımda Neler Değişmeli?\nHer 15.000 km veya yılda bir yapılan periyodik bakımda:\n- Motor Yağı ve Yağ Filtresi\n- Hava Filtresi\n- Polen Filtresi (Karbonlu tercih edilmelidir)\n- Yakıt Filtresi (Dizel araçlarda her 30.000 km\'de bir)\nkesinlikle değiştirilmeli, buji ve fren hidroliği kontrolleri yapılmalıdır.',
+    image: '/hero_bg.png',
+    date: '03.06.2026',
+    author: 'Vos74 Kadir Usta',
+    category: 'Mekanik'
+  }
+];
+
 const initialActiveRepairs = [
   {
     id: 1,
@@ -325,6 +349,7 @@ function App() {
   const [activeRepairs, setActiveRepairs] = useState([]);
   const [completedRepairs, setCompletedRepairs] = useState([]);
   const [listings, setListings] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [prefilledAppointment, setPrefilledAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -375,7 +400,8 @@ function App() {
             { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '04.03.2026', desc: 'Triger Seti & Devridaim değişimi ve antifriz yenileme', cost: 7200, master: 'Nuri Usta' },
             { plate: '74 AS 321', model: 'Skoda Octavia 2018', date: '10.10.2025', desc: 'ODIS Detaylı Arıza okuma, lambda sensörü değişimi', cost: 1600, master: 'Selim Usta' }
           ],
-          listings: initialListings
+          listings: initialListings,
+          blogs: initialBlogs
         };
 
         // Seed data if database is fresh/empty
@@ -409,6 +435,9 @@ function App() {
 
         const list = await fetchCol("listings");
         if (list.length > 0) setListings(list);
+
+        const blgs = await fetchCol("blogs");
+        if (blgs.length > 0) setBlogs(blgs);
 
       } catch (error) {
         console.error("Firestore database loading failed:", error);
@@ -697,6 +726,25 @@ function App() {
     }
   };
 
+  // Blog Actions
+  const addBlogPost = async (newPost) => {
+    setBlogs([newPost, ...blogs]);
+    try {
+      await setDoc(doc(db, "blogs", newPost.id), newPost);
+    } catch (e) {
+      console.error("Firestore addBlogPost failed:", e);
+    }
+  };
+
+  const deleteBlogPost = async (id) => {
+    setBlogs(blogs.filter(b => b.id !== id));
+    try {
+      await deleteDoc(doc(db, "blogs", id));
+    } catch (e) {
+      console.error("Firestore deleteBlogPost failed:", e);
+    }
+  };
+
   if (loading) {
     return (
       <div className="app-loader-container">
@@ -786,6 +834,13 @@ function App() {
           />
         )}
 
+        {activeTab === 'blog' && (
+          <Blog 
+            blogs={blogs} 
+            setActiveTab={setActiveTab}
+          />
+        )}
+
         {activeTab === 'appointment' && (
           <Appointment 
             branchInfo={activeBranchInfo}
@@ -816,6 +871,9 @@ function App() {
               addPendingRequest={addPendingRequest}
               listings={listings}
               addMarketplaceListing={addMarketplaceListing}
+              blogs={blogs}
+              addBlogPost={addBlogPost}
+              deleteBlogPost={deleteBlogPost}
               
               // CMS States & Setters
               branchDetails={branchDetails}

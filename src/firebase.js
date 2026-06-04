@@ -73,6 +73,9 @@ export async function seedDatabaseIfEmpty(initialData) {
     // 5. Seed listings
     await seedListCollection("listings", initialData.listings);
 
+    // 6. Seed blogs
+    await seedListCollection("blogs", initialData.blogs);
+
     console.log("Firestore database seeding check completed successfully!");
   } catch (error) {
     console.error("Error during Firestore seeding:", error);

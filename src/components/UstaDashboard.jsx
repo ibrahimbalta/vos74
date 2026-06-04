@@ -35,7 +35,12 @@ export default function UstaDashboard({
   beforeAfterData,
   setBeforeAfterData,
   currentBranch,
-  onLogout
+  onLogout,
+  
+  // Blog Props
+  blogs,
+  addBlogPost,
+  deleteBlogPost
 }) {
   const [subTab, setSubTab] = useState('repairs'); // repairs, appointments, listings, history, cms, hours
   const [newHourInput, setNewHourInput] = useState('');
@@ -98,6 +103,13 @@ export default function UstaDashboard({
   const [newGalTitle, setNewGalTitle] = useState('');
   const [newGalDesc, setNewGalDesc] = useState('');
   const [newGalTag, setNewGalTag] = useState('Atölye');
+
+  // 6. New Blog post form state
+  const [newBlogTitle, setNewBlogTitle] = useState('');
+  const [newBlogSummary, setNewBlogSummary] = useState('');
+  const [newBlogContent, setNewBlogContent] = useState('');
+  const [newBlogImage, setNewBlogImage] = useState('/hero_bg.png');
+  const [newBlogCategory, setNewBlogCategory] = useState('Genel');
 
   // Sync edit text when current branch changes
   React.useEffect(() => {
@@ -846,6 +858,13 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
               <Sparkles size={14} />
               <span>Önce / Sonra Slider</span>
             </button>
+            <button 
+              className={`cms-nav-btn ${cmsSection === 'blog' ? 'active' : ''}`}
+              onClick={() => setCmsSection('blog')}
+            >
+              <FileText size={14} />
+              <span>Blog Yazıları</span>
+            </button>
 
             <div className="cms-help-alert">
               <small>💡 Seçili branş: <strong>{activeBranchData.name}</strong>. Buradan yaptığınız değişiklikler ana sayfada canlı olarak güncellenir.</small>
@@ -1244,6 +1263,137 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
                 </div>
               </div>
             )}
+
+            {/* SECTION 6: BLOG POSTS */}
+            {cmsSection === 'blog' && (
+              <div className="cms-content-section animate-slide-up">
+                <h4>Blog Yazıları Yönetimi</h4>
+                <p className="section-desc-compact">Sitenin blog sayfasında yayınlanan makaleleri yönetin veya yeni bir yazı ekleyin.</p>
+
+                <div className="cms-testimonials-scroll">
+                  {blogs && blogs.map((post) => (
+                    <div key={post.id} className="cms-item-card glass">
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {post.image && <img src={post.image} alt={post.title} style={{ width: '50px', height: '50px', borderRadius: '6px', objectFit: 'cover' }} />}
+                        <div>
+                          <strong>{post.title}</strong>
+                          <span className="cms-badge-role">{post.category || 'Genel'} | {post.date}</span>
+                          <p style={{ fontSize: '0.75rem' }}>{post.summary}</p>
+                        </div>
+                      </div>
+                      <button className="delete-btn-cms" onClick={() => deleteBlogPost && deleteBlogPost(post.id)}>
+                        <Trash size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newBlogTitle || !newBlogSummary || !newBlogContent) return;
+                    const newPost = {
+                      id: 'blog-' + Date.now(),
+                      title: newBlogTitle,
+                      summary: newBlogSummary,
+                      content: newBlogContent,
+                      image: newBlogImage || '/hero_bg.png',
+                      category: newBlogCategory || 'Genel',
+                      date: new Date().toLocaleDateString('tr-TR'),
+                      author: 'Vos74 Kadir Usta'
+                    };
+                    addBlogPost && addBlogPost(newPost);
+                    setNewBlogTitle('');
+                    setNewBlogSummary('');
+                    setNewBlogContent('');
+                    setNewBlogImage('/hero_bg.png');
+                    setNewBlogCategory('Genel');
+                    alert('Blog yazısı başarıyla eklendi!');
+                  }} 
+                  className="cms-inline-add-form glass"
+                >
+                  <h6>➕ Yeni Blog Yazısı Ekle</h6>
+                  
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>Başlık *</label>
+                      <input 
+                        type="text" 
+                        placeholder="Yazı başlığı girin..." 
+                        value={newBlogTitle}
+                        onChange={(e) => setNewBlogTitle(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Kategori *</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: Şanzıman, Mekanik, Bakım" 
+                        value={newBlogCategory}
+                        onChange={(e) => setNewBlogCategory(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Öne Çıkan Resim (Görsel URL / Dosya Yolu)</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: /obd_bg.png veya dosya yükleyin" 
+                        value={newBlogImage}
+                        onChange={(e) => setNewBlogImage(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <label className="glow-btn-secondary" style={{ padding: '10px 15px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', margin: 0, fontSize: '0.85rem' }}>
+                        Dosya Seç
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setNewBlogImage(reader.result);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Özet / Kısa Açıklama *</label>
+                    <textarea 
+                      placeholder="Kart üzerinde görünecek kısa açıklama..."
+                      rows="2"
+                      value={newBlogSummary}
+                      onChange={(e) => setNewBlogSummary(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Tam Yazı İçeriği *</label>
+                    <textarea 
+                      placeholder="Blog yazısının detaylı içeriği..."
+                      rows="6"
+                      value={newBlogContent}
+                      onChange={(e) => setNewBlogContent(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" className="glow-btn full-width">Blog Yazısını Yayınla</button>
+                </form>
+              </div>
+            ) }
 
           </div>
         </div>

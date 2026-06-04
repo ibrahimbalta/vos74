@@ -8,6 +8,7 @@ export default function Navbar({ currentBranchName, activeTab, setActiveTab }) {
     { id: 'home', label: 'Ana Sayfa' },
     { id: 'tracker', label: 'Servis Takip' },
     { id: 'marketplace', label: 'Mağaza' },
+    { id: 'blog', label: 'Blog' },
     { id: 'testimonials', label: 'Referanslar' },
   ];
 
