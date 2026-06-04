@@ -222,6 +222,47 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
 
     if (addPendingRequest) {
       addPendingRequest(id, newExtraItemName, parseFloat(newExtraItemCost));
+
+      // Send WhatsApp notification to the customer
+      const car = activeRepairs.find(c => c.id === id);
+      if (car && car.phone) {
+        // Format phone number for WhatsApp (remove spaces, dashes, leading 0, add 90 prefix)
+        let phoneClean = car.phone.replace(/[\s\-\(\)]/g, '');
+        if (phoneClean.startsWith('0')) phoneClean = '90' + phoneClean.substring(1);
+        if (!phoneClean.startsWith('90') && !phoneClean.startsWith('+')) phoneClean = '90' + phoneClean;
+        phoneClean = phoneClean.replace('+', '');
+
+        const jobsTotal = car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
+        const extrasTotal = car.extraItems ? car.extraItems.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
+        const currentTotal = jobsTotal + extrasTotal;
+
+        const message = `🔧 *Vos74 VAG Özel Servis - Ek Onarım Onay Talebi*
+
+Sayın *${car.owner}*,
+
+*${car.plate}* plakalı *${car.model}* aracınızda devam eden servis işlemleri sırasında ek bir onarım/parça ihtiyacı tespit edilmiştir.
+
+━━━━━━━━━━━━━━━━
+📋 *Ek İşlem Detayı:*
+▸ ${newExtraItemName}
+▸ Tahmini Maliyet: *${parseFloat(newExtraItemCost).toLocaleString('tr-TR')} TL*
+
+💰 *Mevcut Toplam:* ${currentTotal.toLocaleString('tr-TR')} TL
+💰 *Ek İşlem Sonrası Tahmini:* ${(currentTotal + parseFloat(newExtraItemCost)).toLocaleString('tr-TR')} TL
+━━━━━━━━━━━━━━━━
+
+Bu işlemin yapılabilmesi için onayınız gerekmektedir. Lütfen bu mesajı yanıtlayarak *ONAY* veya *RED* bilgisi veriniz.
+
+📞 Sorularınız için: 0532 637 39 78
+🌐 Araç takip: vos74.com.tr
+
+Teşekkür ederiz.
+_Vos74 VAG Grubu Özel Servis_`;
+
+        const whatsappUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
+
       setNewExtraItemName('');
       setNewExtraItemCost('');
       setActiveExtraFormId(null);
