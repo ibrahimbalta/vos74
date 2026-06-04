@@ -20,7 +20,20 @@ import UstaDashboard from './components/UstaDashboard';
 import Login from './components/Login';
 import Blog from './components/Blog';
 import Footer from './components/Footer';
+import CampaignPopup from './components/CampaignPopup';
 import './App.css';
+
+const defaultCampaigns = [
+  {
+    id: 'camp-default-1',
+    title: 'VAG Periyodik Bakım Fırsatı',
+    description: 'Volkswagen, Audi, Seat ve Skoda araçlarınızda periyodik bakım paketlerinde haziran ayına özel %20 indirim ve ücretsiz 15 nokta check-up! Hemen randevunuzu oluşturun.',
+    image: '/obd_bg.png',
+    buttonText: 'Hemen Randevu Al',
+    link: 'appointment',
+    active: true
+  }
+];
 
 const initialBranchDetails = {
   general: {
@@ -353,6 +366,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [prefilledAppointment, setPrefilledAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [campaigns, setCampaigns] = useState([]);
  
   // Dynamic homepage contents state
   const [branchDetails, setBranchDetails] = useState(initialBranchDetails);
@@ -416,6 +430,12 @@ function App() {
           if (settings.workingHours) setWorkingHours(settings.workingHours);
           if (settings.team) setTeam(settings.team);
           if (settings.branchDetails) setBranchDetails(settings.branchDetails);
+          if (settings.campaigns) {
+            setCampaigns(settings.campaigns);
+          } else {
+            setCampaigns(defaultCampaigns);
+            updateDoc(doc(db, "settings", "general"), { campaigns: defaultCampaigns }).catch(console.error);
+          }
         }
 
         // Fetch dynamic lists
@@ -501,6 +521,14 @@ function App() {
     setSocialLinks(prev => {
       const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
       updateDoc(doc(db, "settings", "general"), { socialLinks: updated }).catch(console.error);
+      return updated;
+    });
+  };
+
+  const handleSetCampaigns = async (valOrFunc) => {
+    setCampaigns(prev => {
+      const updated = typeof valOrFunc === 'function' ? valOrFunc(prev) : valOrFunc;
+      updateDoc(doc(db, "settings", "general"), { campaigns: updated }).catch(console.error);
       return updated;
     });
   };
@@ -762,6 +790,9 @@ function App() {
       {/* Interactive Particle Network Background */}
       <ParticleBackground />
 
+      {/* Campaigns Popup Modal */}
+      <CampaignPopup campaigns={campaigns} setActiveTab={setActiveTab} />
+
       {/* Header / Nav */}
       <Navbar 
         currentBranchName={activeBranchInfo.name} 
@@ -888,6 +919,8 @@ function App() {
               setBeforeAfterData={handleSetBeforeAfterData}
               socialLinks={socialLinks}
               setSocialLinks={handleSetSocialLinks}
+              campaigns={campaigns}
+              setCampaigns={handleSetCampaigns}
               currentBranch={branch}
               onLogout={() => setIsAuthenticated(false)}
             />

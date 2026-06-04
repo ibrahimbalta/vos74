@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Calendar, Wrench, Plus, Check, X, Shield, PlusCircle, Trash, Search, 
   DollarSign, Package, Edit3, UserPlus, Image, MessageSquare, Settings2,
-  Share2, FileText, Clock, Sparkles
+  Share2, FileText, Clock, Sparkles, Gift
 } from 'lucide-react';
 
 export default function UstaDashboard({ 
@@ -34,6 +34,8 @@ export default function UstaDashboard({
   setGalleryItems,
   beforeAfterData,
   setBeforeAfterData,
+  campaigns,
+  setCampaigns,
   currentBranch,
   onLogout,
   
@@ -110,6 +112,14 @@ export default function UstaDashboard({
   const [newBlogContent, setNewBlogContent] = useState('');
   const [newBlogImage, setNewBlogImage] = useState('/hero_bg.png');
   const [newBlogCategory, setNewBlogCategory] = useState('Genel');
+
+  // 7. New Campaign form state
+  const [newCampTitle, setNewCampTitle] = useState('');
+  const [newCampDesc, setNewCampDesc] = useState('');
+  const [newCampImage, setNewCampImage] = useState('/obd_bg.png');
+  const [newCampLink, setNewCampLink] = useState('appointment');
+  const [newCampButtonText, setNewCampButtonText] = useState('Hemen Randevu Al');
+  const [newCampActive, setNewCampActive] = useState(true);
 
   // Sync edit text when current branch changes
   React.useEffect(() => {
@@ -366,6 +376,41 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
 
   const deleteGalleryItem = (idx) => {
     setGalleryItems(galleryItems.filter((_, i) => i !== idx));
+  };
+
+  // 7. Campaign management
+  const addCampaign = (e) => {
+    e.preventDefault();
+    if (!newCampTitle || !newCampImage) return;
+
+    const newCamp = {
+      id: 'camp-' + Date.now(),
+      title: newCampTitle,
+      description: newCampDesc,
+      image: newCampImage,
+      link: newCampLink,
+      buttonText: newCampButtonText,
+      active: newCampActive
+    };
+
+    setCampaigns([newCamp, ...(campaigns || [])]);
+    setNewCampTitle('');
+    setNewCampDesc('');
+    setNewCampImage('/obd_bg.png');
+    setNewCampLink('appointment');
+    setNewCampButtonText('Hemen Randevu Al');
+    setNewCampActive(true);
+    alert('Kampanya başarıyla eklendi!');
+  };
+
+  const deleteCampaign = (id) => {
+    if (window.confirm('Bu kampanyayı silmek istediğinize emin misiniz?')) {
+      setCampaigns((campaigns || []).filter(c => c.id !== id));
+    }
+  };
+
+  const toggleCampaignActive = (id) => {
+    setCampaigns((campaigns || []).map(c => c.id === id ? { ...c, active: !c.active } : c));
   };
 
   const steps = [
@@ -864,6 +909,13 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
             >
               <FileText size={14} />
               <span>Blog Yazıları</span>
+            </button>
+            <button 
+              className={`cms-nav-btn ${cmsSection === 'campaigns' ? 'active' : ''}`}
+              onClick={() => setCmsSection('campaigns')}
+            >
+              <Gift size={14} />
+              <span>Kampanyalar</span>
             </button>
 
             <div className="cms-help-alert">
@@ -1394,6 +1446,149 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
                 </form>
               </div>
             ) }
+
+            {/* SECTION 7: CAMPAIGNS */}
+            {cmsSection === 'campaigns' && (
+              <div className="cms-content-section animate-slide-up">
+                <h4>Firma Kampanyaları Yönetimi</h4>
+                <p className="section-desc-compact">Sitede açılan popup penceredeki kampanyaları, görsellerini ve buton yönlendirmelerini düzenleyin.</p>
+
+                {/* Campaigns List */}
+                <div className="cms-grid-items">
+                  {campaigns && campaigns.map((camp) => (
+                    <div key={camp.id} className="cms-item-card glass" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {camp.image && <img src={camp.image} alt={camp.title} style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />}
+                        <div style={{ flex: 1 }}>
+                          <strong>{camp.title}</strong>
+                          <span className={`cms-badge-role ${camp.active ? 'active-badge' : 'inactive-badge'}`} style={{ marginLeft: '8px', background: camp.active ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', color: camp.active ? '#22c55e' : '#ef4444', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+                            {camp.active ? 'Aktif' : 'Pasif'}
+                          </span>
+                          <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>{camp.description}</p>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Buton: {camp.buttonText || 'Yok'} | Yönlendirme: {camp.link}</span>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--border-color)', paddingTop: '10px', marginTop: '5px' }}>
+                        <button 
+                          type="button"
+                          className="glow-btn-secondary" 
+                          style={{ padding: '4px 10px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', width: 'auto' }}
+                          onClick={() => toggleCampaignActive(camp.id)}
+                        >
+                          {camp.active ? 'Duraklat' : 'Aktifleştir'}
+                        </button>
+                        <button type="button" className="delete-btn-cms" onClick={() => deleteCampaign(camp.id)}>
+                          <Trash size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {(!campaigns || campaigns.length === 0) && (
+                    <p style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)', gridColumn: '1 / -1' }}>Kayıtlı kampanya bulunmamaktadır.</p>
+                  )}
+                </div>
+
+                {/* Add New Campaign Form */}
+                <form onSubmit={addCampaign} className="cms-inline-add-form glass">
+                  <h6>➕ Yeni Kampanya Ekle</h6>
+                  
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>Kampanya Başlığı *</label>
+                      <input 
+                        type="text" 
+                        placeholder="Kampanya başlığını girin..." 
+                        value={newCampTitle}
+                        onChange={(e) => setNewCampTitle(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Buton Metni</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: Hemen Randevu Al" 
+                        value={newCampButtonText}
+                        onChange={(e) => setNewCampButtonText(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>Buton Yönlendirme Hedefi</label>
+                      <select 
+                        value={newCampLink} 
+                        onChange={(e) => setNewCampLink(e.target.value)}
+                        style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                      >
+                        <option value="appointment">Randevu Sayfası</option>
+                        <option value="tracker">Araç Sorgulama (Tracker)</option>
+                        <option value="marketplace">Marketplace</option>
+                        <option value="blog">Blog</option>
+                        <option value="https://wa.me/905326373978">WhatsApp İletişim</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '25px' }}>
+                      <input 
+                        type="checkbox" 
+                        id="campActiveCheckbox"
+                        checked={newCampActive}
+                        onChange={(e) => setNewCampActive(e.target.checked)}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="campActiveCheckbox" style={{ cursor: 'pointer', margin: 0 }}>Sitede Gösterilsin (Aktif)</label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Kampanya Resmi Seçin (Bilgisayardan veya Dosya Yolu/URL) *</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: /obd_bg.png veya dosya yükleyin" 
+                        value={newCampImage}
+                        onChange={(e) => setNewCampImage(e.target.value)}
+                        style={{ flex: 1 }}
+                        required
+                      />
+                      <label className="glow-btn-secondary" style={{ padding: '10px 15px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', margin: 0, fontSize: '0.85rem' }}>
+                        Dosya Seç
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setNewCampImage(reader.result);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Açıklama / Detay Metni *</label>
+                    <textarea 
+                      placeholder="Kampanya detaylarını ve şartlarını buraya yazın..."
+                      rows="3"
+                      value={newCampDesc}
+                      onChange={(e) => setNewCampDesc(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" className="glow-btn full-width">Kampanyayı Listeye Ekle</button>
+                </form>
+              </div>
+            )}
 
           </div>
         </div>
