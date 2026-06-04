@@ -137,6 +137,33 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* YouTube "Bugün Servisimizde" Link */
+.nav-link-btn.youtube-link,
+.mobile-nav-link.youtube-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff4444;
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-link-btn.youtube-link:hover,
+.mobile-nav-link.youtube-link:hover {
+  color: #ff0000;
+  background: rgba(255, 0, 0, 0.08);
+}
+
+.youtube-icon {
+  color: #ff0000;
+  animation: youtube-pulse 2s ease-in-out infinite;
+}
+
+@keyframes youtube-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
 .admin-toggle-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
