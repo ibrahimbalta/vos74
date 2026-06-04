@@ -13,7 +13,7 @@ export default function Login({ onLoginSuccess }) {
     setShake(false);
 
     // Simple authentication logic
-    if (username.toLowerCase() === 'usta' && password === '1234') {
+    if (username.toLowerCase() === 'vos74' && password === 'Kg-350707') {
       onLoginSuccess();
     } else {
       setError('Kullanıcı adı veya şifre hatalı!');
@@ -47,7 +47,7 @@ export default function Login({ onLoginSuccess }) {
               <User size={18} className="input-icon" />
               <input 
                 type="text" 
-                placeholder="Örn: usta" 
+                placeholder="Kullanıcı adınız" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -73,11 +73,6 @@ export default function Login({ onLoginSuccess }) {
             <span>Doğrula & Giriş Yap</span>
           </button>
         </form>
-
-        <div className="login-hint-box">
-          <small>🔑 <strong>Demo Giriş Bilgileri:</strong></small>
-          <small>Kullanıcı Adı: <code>usta</code> | Şifre: <code>1234</code></small>
-        </div>
       </div>
     </div>
   );
