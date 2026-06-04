@@ -5710,3 +5710,73 @@
   }
 }
 
+/* ==========================================================================
+   LOYALTY CUSTOMER CARD GENERATOR STYLES
+   ========================================================================== */
+.card-generator-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@keyframes floatCard {
+  0% { 
+    transform: translateY(0px) rotateX(3deg) rotateY(-5deg); 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0px rgba(0, 242, 254, 0);
+  }
+  50% { 
+    transform: translateY(-8px) rotateX(-3deg) rotateY(5deg); 
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 242, 254, 0.1);
+  }
+  100% { 
+    transform: translateY(0px) rotateX(3deg) rotateY(-5deg); 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0px rgba(0, 242, 254, 0);
+  }
+}
+
+@keyframes floatCardActive {
+  0% { 
+    transform: translateY(0px) rotateX(3deg) rotateY(-5deg); 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px var(--primary-glow-strong);
+  }
+  50% { 
+    transform: translateY(-12px) rotateX(-3deg) rotateY(5deg); 
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5), 0 0 35px var(--primary-glow-strong);
+  }
+  100% { 
+    transform: translateY(0px) rotateX(3deg) rotateY(-5deg); 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px var(--primary-glow-strong);
+  }
+}
+
+.vos-loyalty-card {
+  animation: floatCard 6s ease-in-out infinite;
+}
+
+.vos-loyalty-card.created-active {
+  animation: floatCardActive 6s ease-in-out infinite;
+  border-color: var(--primary) !important;
+}
+
+@media (max-width: 992px) {
+  .card-generator-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .generator-preview-panel {
+    order: -1; /* Display card preview at the top on tablets/mobiles */
+  }
+}
+
+.customer-cards-tab-layout {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+}
+
+.table-row-hover:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Calendar, Wrench, Plus, Check, X, Shield, PlusCircle, Trash, Search, 
   DollarSign, Package, Edit3, UserPlus, Image, MessageSquare, Settings2,
-  Share2, FileText, Clock, Sparkles, Gift
+  Share2, FileText, Clock, Sparkles, Gift, CreditCard
 } from 'lucide-react';
 
 export default function UstaDashboard({ 
@@ -36,6 +36,8 @@ export default function UstaDashboard({
   setBeforeAfterData,
   campaigns,
   setCampaigns,
+  customerCards,
+  deleteCustomerCard,
   currentBranch,
   onLogout,
   
@@ -48,6 +50,7 @@ export default function UstaDashboard({
   const [newHourInput, setNewHourInput] = useState('');
   const [includeWarrantyNote, setIncludeWarrantyNote] = useState(false);
   const [cmsSection, setCmsSection] = useState('headers'); // headers, team, testimonials, gallery
+  const [searchCardText, setSearchCardText] = useState('');
 
   // State for Add Listing form
   const [listingTitle, setListingTitle] = useState('');
@@ -477,7 +480,15 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
           onClick={() => setSubTab('history')}
         >
           <Search size={16} />
-          <span>Müşteri Geçmişi</span>
+          <span>Araç Geçmişi</span>
+        </button>
+
+        <button 
+          className={`dash-subtab-btn ${subTab === 'customerCards' ? 'active' : ''}`}
+          onClick={() => setSubTab('customerCards')}
+        >
+          <CreditCard size={16} />
+          <span>Müşteri Kartları ({customerCards ? customerCards.length : 0})</span>
         </button>
 
         <button 
@@ -858,6 +869,95 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB: CUSTOMER LOYALTY CARDS (MÜŞTERİ KARTLARI) */}
+      {subTab === 'customerCards' && (
+        <div className="customer-cards-tab-layout animate-slide-up" style={{ padding: '24px', borderRadius: '12px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+            <div>
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', fontSize: '1.25rem' }}>
+                <CreditCard className="text-gradient" size={22} />
+                <span>Kayıtlı Müşteri VIP İndirim Kartları</span>
+              </h4>
+              <p className="section-desc-compact" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Siteden oluşturulan VIP müşteri indirim kartlarının listesi. Bu kart sahiplerine servis işçiliklerinde %10 indirim uygulanır.
+              </p>
+            </div>
+            
+            {/* Search Input */}
+            <div className="search-box-cms" style={{ position: 'relative', width: '300px' }}>
+              <input 
+                type="text" 
+                placeholder="Plaka veya Müşteri Adı Ara..." 
+                value={searchCardText}
+                onChange={(e) => setSearchCardText(e.target.value)}
+                style={{ width: '100%', padding: '10px 16px 10px 40px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
+              />
+              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            </div>
+          </div>
+
+          <div className="table-responsive" style={{ overflowX: 'auto' }}>
+            <table className="appointments-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  <th style={{ padding: '12px 16px' }}>Kart No / ID</th>
+                  <th style={{ padding: '12px 16px' }}>Müşteri Adı Soyadı</th>
+                  <th style={{ padding: '12px 16px' }}>Araç Plakası</th>
+                  <th style={{ padding: '12px 16px' }}>Telefon</th>
+                  <th style={{ padding: '12px 16px' }}>Kayıt Tarihi</th>
+                  <th style={{ padding: '12px 16px', textRadius: 'center', textAlign: 'center' }}>İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customerCards && customerCards.length > 0 ? (
+                  customerCards
+                    .filter(card => {
+                      const query = searchCardText.toLowerCase().trim();
+                      if (!query) return true;
+                      return (
+                        card.name.toLowerCase().includes(query) ||
+                        card.plate.toLowerCase().includes(query) ||
+                        card.phone.includes(query) ||
+                        card.id.toLowerCase().includes(query)
+                      );
+                    })
+                    .map((card) => (
+                      <tr key={card.id} style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem', transition: 'background-color 0.2s' }} className="table-row-hover">
+                        <td style={{ padding: '14px 16px', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{card.id}</td>
+                        <td style={{ padding: '14px 16px', fontWeight: 600 }}>{card.name}</td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span className="plate-badge" style={{ fontSize: '0.8rem', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>{card.plate}</span>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>{card.phone}</td>
+                        <td style={{ padding: '14px 16px', color: 'var(--text-muted)' }}>{card.createdAt || 'Bilinmiyor'}</td>
+                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                          <button 
+                            type="button"
+                            className="delete-btn-cms" 
+                            style={{ margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'auto' }}
+                            onClick={() => {
+                              if (window.confirm(`${card.name} adına kayıtlı ${card.plate} plakalı indirim kartını silmek istediğinize emin misiniz?`)) {
+                                deleteCustomerCard && deleteCustomerCard(card.id);
+                              }
+                            }}
+                            title="Kartı Sil"
+                          >
+                            <Trash size={15} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>Kayıtlı VIP müşteri kartı bulunmamaktadır.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

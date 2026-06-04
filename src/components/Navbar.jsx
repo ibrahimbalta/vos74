@@ -13,6 +13,7 @@ export default function Navbar({ currentBranchName, activeTab, setActiveTab }) {
   const navItems = [
     { id: 'home', label: 'Ana Sayfa' },
     { id: 'tracker', label: 'Servis Takip' },
+    { id: 'customerCard', label: 'Müşteri Kartı' },
     { id: 'marketplace', label: 'Mağaza' },
     { id: 'blog', label: 'Blog' },
     { id: 'testimonials', label: 'Referanslar' },

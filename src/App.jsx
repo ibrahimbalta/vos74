@@ -21,6 +21,7 @@ import Login from './components/Login';
 import Blog from './components/Blog';
 import Footer from './components/Footer';
 import CampaignPopup from './components/CampaignPopup';
+import CustomerCardGenerator from './components/CustomerCardGenerator';
 import './App.css';
 
 const defaultCampaigns = [
@@ -367,6 +368,7 @@ function App() {
   const [prefilledAppointment, setPrefilledAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState([]);
+  const [customerCards, setCustomerCards] = useState([]);
  
   // Dynamic homepage contents state
   const [branchDetails, setBranchDetails] = useState(initialBranchDetails);
@@ -458,6 +460,9 @@ function App() {
 
         const blgs = await fetchCol("blogs");
         if (blgs.length > 0) setBlogs(blgs);
+
+        const cards = await fetchCol("customerCards");
+        if (cards.length > 0) setCustomerCards(cards);
 
       } catch (error) {
         console.error("Firestore database loading failed:", error);
@@ -773,6 +778,24 @@ function App() {
     }
   };
 
+  const addCustomerCard = async (newCard) => {
+    setCustomerCards([newCard, ...customerCards]);
+    try {
+      await setDoc(doc(db, "customerCards", newCard.id), newCard);
+    } catch (e) {
+      console.error("Firestore addCustomerCard failed:", e);
+    }
+  };
+
+  const deleteCustomerCard = async (id) => {
+    setCustomerCards(customerCards.filter(c => c.id !== id));
+    try {
+      await deleteDoc(doc(db, "customerCards", id));
+    } catch (e) {
+      console.error("Firestore deleteCustomerCard failed:", e);
+    }
+  };
+
   if (loading) {
     return (
       <div className="app-loader-container">
@@ -858,6 +881,12 @@ function App() {
           />
         )}
 
+        {activeTab === 'customerCard' && (
+          <CustomerCardGenerator 
+            addCustomerCard={addCustomerCard}
+          />
+        )}
+
         {activeTab === 'marketplace' && (
           <Marketplace 
             listings={listings} 
@@ -921,6 +950,8 @@ function App() {
               setSocialLinks={handleSetSocialLinks}
               campaigns={campaigns}
               setCampaigns={handleSetCampaigns}
+              customerCards={customerCards}
+              deleteCustomerCard={deleteCustomerCard}
               currentBranch={branch}
               onLogout={() => setIsAuthenticated(false)}
             />
