@@ -8,11 +8,23 @@ export default function Navbar({ currentBranchName, activeTab, setActiveTab }) {
     { id: 'home', label: 'Ana Sayfa' },
     { id: 'tracker', label: 'Servis Takip' },
     { id: 'marketplace', label: 'Mağaza' },
+    { id: 'testimonials', label: 'Referanslar' },
   ];
 
   const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
-    setMobileMenuOpen(false);
+    if (tabId === 'testimonials') {
+      setActiveTab('home');
+      setMobileMenuOpen(false);
+      setTimeout(() => {
+        const element = document.getElementById('testimonials');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    } else {
+      setActiveTab(tabId);
+      setMobileMenuOpen(false);
+    }
   };
 
   return (

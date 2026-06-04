@@ -81,7 +81,7 @@ export default function Testimonials({ testimonials = [] }) {
   const active = activeTestimonials[activeIndex];
 
   return (
-    <section className="testimonials-section">
+    <section id="testimonials" className="testimonials-section">
       <ScrollReveal>
         <div className="section-header">
           <span className="badge">💬 Müşteri Deneyimleri</span>

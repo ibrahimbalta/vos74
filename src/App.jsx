@@ -26,7 +26,7 @@ const initialBranchDetails = {
     id: 'general',
     name: 'Vos74 VAG Grubu Özel Servis',
     title: 'Volkswagen, Audi, Seat & Skoda Servisi',
-    subtitle: 'Bartın Yeni Sanayi Sitesi\'nde VAG grubu araçlarınız için orijinal standartlarda şeffaf, garantili ve profesyonel servis hizmeti.',
+    subtitle: 'Bartın, Karabük ve Zonguldak bölgesindeki VAG grubu (Volkswagen, Audi, Seat, Skoda) araçlarınız için orijinal standartlarda şeffaf, garantili ve profesyonel özel servis hizmeti (Bartın Yeni Sanayi Sitesi).',
     themeClass: 'theme-general',
     services: [
       { id: 'sg1', title: 'Periyodik Bakım', desc: 'Motor yağı, filtreler ve detaylı VAG grubu periyodik kontrol prosedürleri.', price: '1,500 - 3,500 TL' },
@@ -39,7 +39,7 @@ const initialBranchDetails = {
     id: 'mechanic',
     name: 'Motor & Ağır Mekanik',
     title: 'VAG Motor & Mekanik Atölyesi',
-    subtitle: 'TSI, TDI ve TFSI motor gruplarında rektefiye, ağır bakım, zincir değişimi ve şanzıman onarımı garantili yapılır.',
+    subtitle: 'Bartın, Karabük ve Zonguldak VAG grubu araçlarda TSI, TDI ve TFSI motor rektefiye, ağır bakım, zincir değişimi ve DSG şanzıman onarımı.',
     themeClass: 'theme-mechanic',
     services: [
       { id: 'sm1', title: 'Motor Rektefiye', desc: 'Motor blok rektefiyesi, piston, yatak ve sübap sıfırlama işlemleri.', price: '25,000 - 80,000 TL' },
@@ -52,7 +52,7 @@ const initialBranchDetails = {
     id: 'electric',
     name: 'Elektrik & ECU Teşhis',
     title: 'Dijital Elektronik & Yazılım',
-    subtitle: 'Araç beyin (ECU) programlama, elektronik modül kodlama ve akıllı elektrik tesisatı onarımları.',
+    subtitle: 'Bartın, Karabük ve Zonguldak bölgelerinde VAG grubu beyin (ECU) programlama, elektronik modül kodlama ve akıllı elektrik tesisatı.',
     themeClass: 'theme-electric',
     services: [
       { id: 'se1', title: 'ECU Programlama & Kodlama', desc: 'Orijinal VAG ODIS cihazı ile online beyin kodlama ve yazılım güncellemesi.', price: '3,000 - 10,000 TL' },
@@ -65,7 +65,7 @@ const initialBranchDetails = {
     id: 'bodypaint',
     name: 'Kaporta & Pasta Cila',
     title: 'Kusursuz Detay & Kaporta Atölyesi',
-    subtitle: 'Boyasız göçük düzeltme (PDR), fırın boyama ve profesyonel pasta cila - seramik kaplama uygulamaları.',
+    subtitle: 'Bartın, Karabük, Zonguldak boyasız göçük düzeltme (PDR), fırın boyama ve profesyonel pasta cila - seramik kaplama uygulamaları.',
     themeClass: 'theme-bodypaint',
     services: [
       { id: 'sb1', title: 'Boyasız Göçük Düzeltme', desc: 'PDR yöntemiyle boyaya zarar vermeden dolu ve sürtme çöküklerinin düzeltilmesi.', price: '1,000 - 6,000 TL' },
