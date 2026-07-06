@@ -2207,13 +2207,13 @@ _Vos74 VAG Grubu Özel Servis_`;
         <div className="print-invoice-modal-overlay">
           <div className="print-invoice-modal print-area glass-card">
             {/* Modal Header for UI display, hidden in print */}
-            <div className="print-modal-header no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div className="print-modal-header no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #e5e7eb', paddingBottom: '15px', marginBottom: '15px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={20} className="text-gradient" />
-                <h4 style={{ margin: 0 }}>Servis Fişi Önizleme</h4>
+                <FileText size={20} style={{ color: '#06b6d4' }} />
+                <h4 style={{ margin: 0, color: '#111827', fontWeight: 'bold' }}>Servis Fişi Önizleme</h4>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', margin: 0 }}>
+                <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', margin: 0, color: '#111827', fontWeight: 'bold' }}>
                   <input 
                     type="checkbox" 
                     checked={includeWarrantyNote} 
@@ -2232,8 +2232,19 @@ _Vos74 VAG Grubu Özel Servis_`;
                   </button>
                   <button 
                     onClick={() => setPrintingCar(null)} 
-                    className="glow-btn-secondary"
-                    style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                    style={{ 
+                      padding: '8px 16px', 
+                      fontSize: '0.85rem', 
+                      background: '#ef4444', 
+                      color: '#ffffff', 
+                      border: 'none', 
+                      borderRadius: '6px', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '6px',
+                      fontWeight: 'bold'
+                    }}
                   >
                     <X size={16} /> Kapat
                   </button>
