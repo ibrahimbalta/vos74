@@ -808,10 +808,19 @@ function App() {
   if (loading) {
     return (
       <div className="app-loader-container">
-        <div className="app-loader-card glass">
-          <div className="neon-spinner"></div>
-          <h2>Vos74 Veritabanı Yükleniyor...</h2>
-          <p>Lütfen bekleyiniz, veriler güvenli bir şekilde senkronize ediliyor.</p>
+        <div className="app-loader-card glass-card">
+          <div className="loader-logo-wrapper">
+            <img src="/logo.png" alt="Vos74 Logo" className="loader-logo-img" />
+            <div className="logo-glow-pulse"></div>
+          </div>
+          
+          <div className="loader-progress-container">
+            <div className="loader-progress-bar"></div>
+            <div className="loader-progress-scanner"></div>
+          </div>
+
+          <h2 className="text-gradient" style={{ margin: '0', fontSize: '1.4rem', fontWeight: '800' }}>Vos74 Veritabanı Yükleniyor...</h2>
+          <p className="loader-status-text">Lütfen bekleyiniz, veriler güvenli bir şekilde senkronize ediliyor.</p>
         </div>
       </div>
     );

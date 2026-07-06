@@ -7,6 +7,23 @@
   /* Font Families */
   --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Default CSS Theme Colors (Cyan Theme fallback) */
+  --bg-primary: #060b11;
+  --bg-secondary: #0e151d;
+  --bg-tertiary: #151e29;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --primary: #06b6d4;
+  --primary-glow: rgba(6, 182, 212, 0.2);
+  --primary-glow-strong: rgba(6, 182, 212, 0.45);
+  --primary-hover: #0891b2;
+  --border-color: #1e2d3d;
+  --card-bg: rgba(14, 21, 29, 0.8);
+  --card-hover-bg: rgba(21, 30, 41, 0.95);
+  --accent: #38bdf8;
+  --badge-bg: rgba(6, 182, 212, 0.12);
 }
 
 /* Default Colors (Orange Theme) */
