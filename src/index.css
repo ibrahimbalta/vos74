@@ -556,16 +556,17 @@ input:focus, select:focus, textarea:focus {
 .print-invoice-modal {
   width: 100%;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 30px;
-  color: var(--text-primary);
+  background: #ffffff !important;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 30px 40px;
+  color: #000000 !important;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
 }
 
 .print-modal-header {

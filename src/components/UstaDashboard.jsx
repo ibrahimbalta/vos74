@@ -80,6 +80,14 @@ export default function UstaDashboard({
   const [newRepairBay, setNewRepairBay] = useState('lift1');
   const [newRepairUsta, setNewRepairUsta] = useState('');
 
+  // Extra detailed receipt fields
+  const [newRepairKm, setNewRepairKm] = useState('');
+  const [newRepairChassis, setNewRepairChassis] = useState('');
+  const [newRepairMotorNo, setNewRepairMotorNo] = useState('');
+  const [newRepairBroughtBy, setNewRepairBroughtBy] = useState('');
+  const [newRepairAdvisor, setNewRepairAdvisor] = useState('İbrahim BALTA');
+  const [showExtraInputs, setShowExtraInputs] = useState(false);
+
   React.useEffect(() => {
     if (team && team.length > 0 && !newRepairUsta) {
       setNewRepairUsta(team[0].name);
@@ -107,7 +115,12 @@ export default function UstaDashboard({
       pendingApproval: null,
       deliveryTime: 'İnceleme Sonrası Belirlenecek',
       bayId: newRepairBay,
-      assignedUsta: newRepairUsta || (team[0]?.name || '')
+      assignedUsta: newRepairUsta || (team[0]?.name || ''),
+      km: newRepairKm || '105.437',
+      chassis: newRepairChassis.toUpperCase().trim() || 'WUW222612244008293',
+      motorNo: newRepairMotorNo.toUpperCase().trim() || 'CJZC12926',
+      broughtBy: newRepairBroughtBy || newRepairOwner,
+      advisor: newRepairAdvisor || 'İbrahim BALTA'
     };
 
     if (addActiveRepair) {
@@ -118,6 +131,12 @@ export default function UstaDashboard({
       setNewRepairPhone('');
       setNewRepairService('');
       setNewRepairCost('');
+      setNewRepairKm('');
+      setNewRepairChassis('');
+      setNewRepairMotorNo('');
+      setNewRepairBroughtBy('');
+      setNewRepairAdvisor('İbrahim BALTA');
+      setShowExtraInputs(false);
       setShowAddRepairForm(false);
       alert(`${newRepair.plate} plakalı araç aktif işlere eklendi!`);
     }
@@ -762,6 +781,71 @@ _Vos74 VAG Grubu Özel Servis_`;
                     </select>
                   </div>
                 </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowExtraInputs(!showExtraInputs)}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
+                  >
+                    <span>{showExtraInputs ? '▼ Ekstra Detayları Gizle' : '▶ Ekstra Detayları Göster (Şase, KM, Motor vb.)'}</span>
+                  </button>
+                </div>
+
+                {showExtraInputs && (
+                  <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kilometre (KM)</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: 105.437" 
+                        value={newRepairKm}
+                        onChange={(e) => setNewRepairKm(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Şase Numarası</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: WUW222612244008293" 
+                        value={newRepairChassis}
+                        onChange={(e) => setNewRepairChassis(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Motor Numarası</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: CJZC12926" 
+                        value={newRepairMotorNo}
+                        onChange={(e) => setNewRepairMotorNo(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Aracı Getiren Kişi</label>
+                      <input 
+                        type="text" 
+                        placeholder="Müşteriden farklıysa girin" 
+                        value={newRepairBroughtBy}
+                        onChange={(e) => setNewRepairBroughtBy(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: 'span 2' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Servis Danışmanı</label>
+                      <input 
+                        type="text" 
+                        placeholder="Örn: İbrahim BALTA" 
+                        value={newRepairAdvisor}
+                        onChange={(e) => setNewRepairAdvisor(e.target.value)}
+                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <button type="submit" className="glow-btn" style={{ width: '100%', padding: '12px', fontSize: '1rem', fontWeight: 'bold' }}>
                   Aracı Atölyeye Kabul Et (Aktif İşlere Ekle)
@@ -2164,119 +2248,217 @@ _Vos74 VAG Grubu Özel Servis_`;
             </div>
 
             {/* Printable Invoice Body */}
-            <div className="invoice-container">
-              {/* Receipt Header */}
-              <div className="invoice-header">
-                <div className="invoice-company-details">
-                  <div className="invoice-logo">⚙️ Vos74 Özel Servis</div>
-                  <p className="invoice-subtitle">Dijital Servis Takip ve Onarım Fişi</p>
-                  <small>E-Posta: info@vos74.com | Tel: +90 532 637 39 78</small>
-                </div>
-                <div className="invoice-meta">
-                  <h3>SERVİS FİŞİ</h3>
-                  <p><strong>Fiş No:</strong> DS-{printingCar.id}{Date.now().toString().slice(-4)}</p>
-                  <p><strong>Tarih:</strong> {new Date().toLocaleDateString('tr-TR')}</p>
-                </div>
-              </div>
-
-              <hr className="invoice-divider" />
-
-              {/* Customer and Vehicle Info */}
-              <div className="invoice-details-grid">
-                <div className="details-col">
-                  <h5>Müşteri Bilgileri</h5>
-                  <p><strong>Adı Soyadı:</strong> {printingCar.owner}</p>
-                  <p><strong>Telefon:</strong> {printingCar.phone}</p>
-                </div>
-                <div className="details-col">
-                  <h5>Araç Bilgileri</h5>
-                  <p><strong>Plaka:</strong> <span className="plate-badge" style={{ display: 'inline-block', verticalAlign: 'middle', background: '#000', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>{printingCar.plate}</span></p>
-                  <p><strong>Araç Modeli:</strong> {printingCar.model}</p>
-                  <p><strong>Servis Durumu:</strong> {printingCar.status === 'hazir' ? 'Teslime Hazır' : 'İşlem Görmekte'}</p>
-                </div>
-              </div>
-
-              {/* Itemized Invoice Table */}
-              <table className="invoice-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                    <th style={{ padding: '8px 0' }}>Sıra</th>
-                    <th style={{ padding: '8px 0' }}>Yapılan İşlem / Parça</th>
-                    <th style={{ padding: '8px 0' }}>Tür</th>
-                    <th style={{ padding: '8px 0', textAlign: 'right' }}>Fiyat (TL)</th>
-                  </tr>
-                </thead>
+            <div className="invoice-container print-paper-invoice" style={{ fontFamily: 'Arial, sans-serif', color: '#000', background: '#fff', padding: '0', boxSizing: 'border-box' }}>
+              
+              {/* Top Double-Column Header Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000' }}>
                 <tbody>
-                  {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => (
-                    <tr key={`job-${idx}`} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <td style={{ padding: '8px 0' }}>{idx + 1}</td>
-                      <td style={{ padding: '8px 0' }}>{typeof job === 'object' ? job.name : job}</td>
-                      <td style={{ padding: '8px 0' }}>Mekanik / İşçilik</td>
-                      <td style={{ padding: '8px 0', textAlign: 'right' }}>{typeof job === 'object' ? job.cost : 0} TL</td>
-                    </tr>
-                  ))}
-                  {printingCar.extraItems && printingCar.extraItems.map((item, idx) => (
-                    <tr key={`extra-${idx}`} style={{ borderBottom: '1px solid var(--border-color)', fontStyle: 'italic' }}>
-                      <td style={{ padding: '8px 0' }}>{(printingCar.jobsDone?.length || 0) + idx + 1}</td>
-                      <td style={{ padding: '8px 0' }}>➕ {item.name} (Ekstra Onaylanan)</td>
-                      <td style={{ padding: '8px 0' }}>Yedek Parça / Ekstra</td>
-                      <td style={{ padding: '8px 0', textAlign: 'right' }}>{item.cost} TL</td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td style={{ width: '55%', border: '1px solid #000', padding: '8px', verticalAlign: 'top' }}>
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>ETKİLİ SERVİS</h3>
+                      <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000' }}><strong>{printingCar.assignedUsta || 'Kadir GÜL'}:</strong> 0532 637 39 78</p>
+                      <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000', lineHeight: '1.3' }}><strong>ADRES:</strong> Gölbucağı Mah. Yeni Sanayi Sitesi Cami Sok. 13 / BARTIN</p>
+                    </td>
+                    <td style={{ width: '45%', border: '1px solid #000', padding: '8px', verticalAlign: 'top', position: 'relative' }}>
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', color: '#000', textTransform: 'uppercase' }}>ARAÇ KABUL FORMU</h3>
+                      
+                      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '4px' }}>
+                        <tbody>
+                          <tr>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', width: '50%', color: '#000' }}>İş Emri Sıra No</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 'bold', color: '#000' }}>DS-{printingCar.id}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Kabul Tarihi</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{new Date().toLocaleDateString('tr-TR')}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Teslim Tarihi</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{printingCar.deliveryTime && printingCar.deliveryTime.includes(':') ? new Date().toLocaleDateString('tr-TR') : (printingCar.deliveryTime || new Date().toLocaleDateString('tr-TR'))}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
+                        <img src="/logo.png" alt="Vos74" style={{ maxHeight: '40px', width: 'auto', objectFit: 'contain' }} />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ef4444', margin: '2px 0 0 0', letterSpacing: '0.5px' }}>ETKİLİ SERVİS</span>
+                      </div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
 
-              {/* Price Calculation details */}
-              <div className="invoice-summary-box" style={{ marginTop: '20px', marginLeft: 'auto', width: '300px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Ara Toplam:</span>
-                  <span>
-                    {Math.round(
-                      ((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                       (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.833
-                    )} TL
-                  </span>
-                </div>
-                <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>KDV (%20):</span>
-                  <span>
-                    {Math.round(
-                      ((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                       (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.167
-                    )} TL
-                  </span>
-                </div>
-                <div className="summary-row grand-total" style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '2px solid var(--primary)', paddingTop: '8px', fontSize: '1.2rem', color: 'var(--primary)' }}>
-                  <span>Genel Toplam:</span>
-                  <span>
-                    {(printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                     (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)} TL
-                  </span>
+              {/* Araç Bilgileri Grid Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
+                <tbody>
+                  <tr>
+                    <td colSpan="4" style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>ARAÇ BİLGİLERİ</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Araç Plakası</td>
+                    <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontWeight: 'bold', color: '#000' }}>{printingCar.plate}</td>
+                    <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Müşteri Adı</td>
+                    <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.owner}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Kilometre</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.km || '105.437'}</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Telefon</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.phone}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Marka / Model</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.model}</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Aracı Getiren</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.broughtBy || printingCar.owner}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Şase No</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.chassis || 'WUW222612244008293'}</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Getiren Tel / İmza</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', height: '24px', verticalAlign: 'middle', color: '#000' }}>{printingCar.phone} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
+                  </tr>
+                  <tr>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Motor No</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.motorNo || 'CJZC12926'}</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Servis Danışmanı / İmza</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.advisor || 'İbrahim BALTA'} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Müşteri Talepleri Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>MÜŞTERİ TALEPLERİ</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0', border: '1px solid #000' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <tbody>
+                          {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => (
+                            <tr key={`demand-${idx}`}>
+                              <td style={{ borderBottom: '1px solid #000', borderRight: '1px solid #000', width: '30px', textAlign: 'center', padding: '5px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{idx + 1}</td>
+                              <td style={{ borderBottom: '1px solid #000', padding: '5px 10px', fontSize: '0.8rem', color: '#000' }}>{typeof job === 'object' ? job.name : job}</td>
+                            </tr>
+                          ))}
+                          {(!printingCar.jobsDone || printingCar.jobsDone.length === 0) && (
+                            <tr>
+                              <td style={{ padding: '8px', fontSize: '0.8rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>Müşteri talebi bulunmamaktadır.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Fitted Parts & Labor Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none', marginTop: '15px' }}>
+                <thead>
+                  <tr style={{ background: '#e5e7eb' }}>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '6%', textAlign: 'center', color: '#000' }}>S.NO</th>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '44%', textAlign: 'left', color: '#000' }}>TAKILAN PARÇA / YAPILAN İŞÇİLİK</th>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '12%', textAlign: 'right', color: '#000' }}>BİRİM FİYAT</th>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '8%', textAlign: 'center', color: '#000' }}>ADET</th>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '14%', textAlign: 'right', color: '#000' }}>İŞÇİLİK</th>
+                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '16%', textAlign: 'right', color: '#000' }}>PARÇA TOPLAM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => {
+                    const jobName = typeof job === 'object' ? job.name : job;
+                    const jobCost = typeof job === 'object' ? job.cost : 0;
+                    return (
+                      <tr key={`part-${idx}`}>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{idx + 1}</td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>{jobName}</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{jobCost} TL</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{jobCost} TL</td>
+                      </tr>
+                    );
+                  })}
+                  
+                  {printingCar.extraItems && printingCar.extraItems.map((item, idx) => {
+                    const globalIdx = (printingCar.jobsDone?.length || 0) + idx + 1;
+                    return (
+                      <tr key={`extra-${idx}`} style={{ fontStyle: 'italic' }}>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{globalIdx}</td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>➕ {item.name}</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{item.cost} TL</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{item.cost} TL</td>
+                      </tr>
+                    );
+                  })}
+                  
+                  {/* Padding empty rows to fit the receipt paper design */}
+                  {Array.from({ length: Math.max(0, 10 - ((printingCar.jobsDone?.length || 0) + (printingCar.extraItems?.length || 0))) }).map((_, idx) => {
+                    const globalIdx = (printingCar.jobsDone?.length || 0) + (printingCar.extraItems?.length || 0) + idx + 1;
+                    return (
+                      <tr key={`empty-${idx}`} style={{ height: '22px' }}>
+                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#999' }}>{globalIdx}</td>
+                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                      </tr>
+                    );
+                  })}
+
+                  {/* Calculations footer */}
+                  <tr>
+                    <td colSpan="4" style={{ border: '1px solid #000', borderBottom: 'none', borderLeft: 'none', background: 'transparent' }}></td>
+                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Parça Toplamı</td>
+                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                      {Math.round(((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
+                                  (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.833)} TL
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
+                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>İşçilik Toplamı</td>
+                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                      {Math.round(((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
+                                  (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.167)} TL
+                    </td>
+                  </tr>
+                  <tr style={{ background: '#e5e7eb' }}>
+                    <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>Genel Toplam</td>
+                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                      {(printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
+                       (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)} TL
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Accept footer and signature lines */}
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#000', margin: '0 0 10px 0' }}>ARACIMA TAKILAN PARÇA VE İŞÇİLİKLERİ TARAFIMCA KABUL EDERİM</p>
+                {includeWarrantyNote && (
+                  <p style={{ fontSize: '0.7rem', fontStyle: 'italic', color: '#ef4444', margin: '-5px 0 10px 0', fontWeight: 'bold' }}>* Takılan yedek parçalar ve işçilikler 1 yıl boyunca servisimiz garantisi altındadır.</p>
+                )}
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 50px', marginTop: '25px' }}>
+                  <div style={{ textAlign: 'center', width: '130px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM ALAN</span>
+                    <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
+                  </div>
+                  <div style={{ textAlignment: 'center', width: '130px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM EDEN</span>
+                    <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Footer notes */}
-              <div className="invoice-footer" style={{ marginTop: '40px' }}>
-                <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Açıklamalar & Notlar:</p>
-                <ul style={{ paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  <li>Bu fiş dijital servis takip sistemi üzerinden otomatik olarak oluşturulmuştur.</li>
-                  {includeWarrantyNote && (
-                    <li>Takılan yedek parçalar ve işçilikler 1 yıl boyunca servisimiz garantisi altındadır.</li>
-                  )}
-                </ul>
-                <div className="signature-area" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px' }}>
-                  <div className="sig-box" style={{ width: '200px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.9rem', marginBottom: '30px' }}>Servis Sorumlusu (Usta)</p>
-                    <div style={{ borderBottom: '1px solid var(--border-color)', margin: '10px 0' }}></div>
-                    <small style={{ color: 'var(--text-muted)' }}>İmza / Kaşe</small>
-                  </div>
-                  <div className="sig-box" style={{ width: '200px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.9rem', marginBottom: '30px' }}>Müşteri</p>
-                    <div style={{ borderBottom: '1px solid var(--border-color)', margin: '10px 0' }}></div>
-                    <small style={{ color: 'var(--text-muted)' }}>İmza</small>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
