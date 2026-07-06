@@ -548,6 +548,15 @@ function App() {
     }
   };
 
+  const addActiveRepair = async (newRepair) => {
+    setActiveRepairs([newRepair, ...activeRepairs]);
+    try {
+      await setDoc(doc(db, "activeRepairs", String(newRepair.id)), newRepair);
+    } catch (e) {
+      console.error("Firestore addActiveRepair failed:", e);
+    }
+  };
+
   const addWorkingHour = async (hour) => {
     if (!hour || workingHours.includes(hour)) return;
     const updated = [...workingHours, hour].sort((a, b) => a.localeCompare(b));
@@ -929,6 +938,7 @@ function App() {
               deleteRepairJob={deleteRepairJob}
               updateRepairJobCost={updateRepairJobCost}
               addPendingRequest={addPendingRequest}
+              addActiveRepair={addActiveRepair}
               listings={listings}
               addMarketplaceListing={addMarketplaceListing}
               blogs={blogs}

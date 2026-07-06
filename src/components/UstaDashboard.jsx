@@ -20,6 +20,7 @@ export default function UstaDashboard({
   deleteRepairJob,
   updateRepairJobCost,
   addPendingRequest, 
+  addActiveRepair,
   listings, 
   addMarketplaceListing,
   
@@ -63,6 +64,52 @@ export default function UstaDashboard({
   // State for adding extra jobs
   const [newJobTexts, setNewJobTexts] = useState({});
   const [newJobCosts, setNewJobCosts] = useState({});
+  
+  // State for creating new active repair (job) directly
+  const [showAddRepairForm, setShowAddRepairForm] = useState(false);
+  const [newRepairPlate, setNewRepairPlate] = useState('');
+  const [newRepairBrand, setNewRepairBrand] = useState('Volkswagen');
+  const [newRepairModel, setNewRepairModel] = useState('');
+  const [newRepairYear, setNewRepairYear] = useState('2018');
+  const [newRepairOwner, setNewRepairOwner] = useState('');
+  const [newRepairPhone, setNewRepairPhone] = useState('');
+  const [newRepairService, setNewRepairService] = useState('');
+  const [newRepairCost, setNewRepairCost] = useState('');
+
+  const handleCreateActiveRepair = (e) => {
+    e.preventDefault();
+    if (!newRepairPlate || !newRepairOwner || !newRepairPhone) return;
+
+    const newId = activeRepairs.length > 0 ? Math.max(...activeRepairs.map(r => Number(r.id) || 0)) + 1 : 1;
+    const modelFull = `${newRepairBrand} ${newRepairModel} (${newRepairYear})`;
+    const costVal = Number(newRepairCost) || 0;
+
+    const newRepair = {
+      id: newId,
+      plate: newRepairPlate.toUpperCase().trim(),
+      model: modelFull,
+      owner: newRepairOwner,
+      phone: newRepairPhone,
+      status: 'kabul',
+      baseCost: costVal,
+      jobsDone: newRepairService ? [{ name: newRepairService, cost: costVal }] : [],
+      extraItems: [],
+      pendingApproval: null,
+      deliveryTime: 'İnceleme Sonrası Belirlenecek'
+    };
+
+    if (addActiveRepair) {
+      addActiveRepair(newRepair);
+      setNewRepairPlate('');
+      setNewRepairModel('');
+      setNewRepairOwner('');
+      setNewRepairPhone('');
+      setNewRepairService('');
+      setNewRepairCost('');
+      setShowAddRepairForm(false);
+      alert(`${newRepair.plate} plakalı araç aktif işlere eklendi!`);
+    }
+  };
   const [newExtraItemName, setNewExtraItemName] = useState('');
   const [newExtraItemCost, setNewExtraItemCost] = useState('');
   const [activeExtraFormId, setActiveExtraFormId] = useState(null);
@@ -544,7 +591,145 @@ _Vos74 VAG Grubu Özel Servis_`;
 
       {/* SUBTAB 1: ACTIVE REPAIRS */}
       {subTab === 'repairs' && (
-        <div className="repairs-dashboard-grid">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', gridColumn: '1 / -1' }}>
+          
+          {/* Add Repair Toggle Button & Form */}
+          <div className="glass-card" style={{ padding: '20px', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wrench className="text-primary" size={20} />
+                <span>Atölye İş Takibi</span>
+              </h4>
+              <button 
+                onClick={() => setShowAddRepairForm(!showAddRepairForm)} 
+                className="glow-btn"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '0.85rem' }}
+              >
+                <Plus size={16} />
+                <span>{showAddRepairForm ? 'Formu Kapat' : 'Yeni İş Girişi Ekle'}</span>
+              </button>
+            </div>
+
+            {showAddRepairForm && (
+              <form onSubmit={handleCreateActiveRepair} className="admin-form animate-slide-up" style={{ marginTop: '20px', borderTop: '1px dashed var(--border-color)', paddingTop: '20px' }}>
+                <h5 style={{ margin: '0 0 15px 0', fontSize: '1.5rem', color: 'var(--primary)' }}>Yeni Araç ve İş Kabul Formu</h5>
+                
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Araç Plakası *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: 74VS074" 
+                      value={newRepairPlate}
+                      onChange={(e) => setNewRepairPlate(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Müşteri Adı Soyadı *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: Ahmet Yılmaz" 
+                      value={newRepairOwner}
+                      onChange={(e) => setNewRepairOwner(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Müşteri Telefon Numarası *</label>
+                    <input 
+                      type="tel" 
+                      placeholder="Örn: 0532 123 45 67" 
+                      value={newRepairPhone}
+                      onChange={(e) => setNewRepairPhone(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Araç Markası *</label>
+                    <select 
+                      value={newRepairBrand} 
+                      onChange={(e) => setNewRepairBrand(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                    >
+                      <option value="Volkswagen">Volkswagen</option>
+                      <option value="Audi">Audi</option>
+                      <option value="Seat">Seat</option>
+                      <option value="Skoda">Skoda</option>
+                      <option value="Fiat">Fiat</option>
+                      <option value="Renault">Renault</option>
+                      <option value="Ford">Ford</option>
+                      <option value="BMW">BMW</option>
+                      <option value="Mercedes">Mercedes</option>
+                      <option value="Opel">Opel</option>
+                      <option value="Peugeot">Peugeot</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Araç Modeli *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: Golf 7 1.6 TDI" 
+                      value={newRepairModel}
+                      onChange={(e) => setNewRepairModel(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Model Yılı *</label>
+                    <select 
+                      value={newRepairYear} 
+                      onChange={(e) => setNewRepairYear(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                    >
+                      {Array.from({ length: 25 }, (_, i) => 2026 - i).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Yapılacak İlk İşlem / Şikayet</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: Periyodik Bakım Yapılacak" 
+                      value={newRepairService}
+                      onChange={(e) => setNewRepairService(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>İşlem Ücreti (TL)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Örn: 2500" 
+                      value={newRepairCost}
+                      onChange={(e) => setNewRepairCost(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="glow-btn" style={{ width: '100%', padding: '12px', fontSize: '1rem', fontWeight: 'bold' }}>
+                  Aracı Atölyeye Kabul Et (Aktif İşlere Ekle)
+                </button>
+              </form>
+            )}
+          </div>
+
+          <div className="repairs-dashboard-grid">
           {activeRepairs.length > 0 ? (
             activeRepairs.map((car) => (
               <div className="glass-card repair-manage-card" key={car.id}>
@@ -752,7 +937,8 @@ _Vos74 VAG Grubu Özel Servis_`;
             </div>
           )}
         </div>
-      )}
+      </div>
+    )}
 
       {/* SUBTAB 2: INCOMING APPOINTMENTS */}
       {subTab === 'appointments' && (
