@@ -782,70 +782,64 @@ _Vos74 VAG Grubu Özel Servis_`;
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowExtraInputs(!showExtraInputs)}
-                    style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
-                  >
-                    <span>{showExtraInputs ? '▼ Ekstra Detayları Gizle' : '▶ Ekstra Detayları Göster (Şase, KM, Motor vb.)'}</span>
-                  </button>
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Kilometre (KM)</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: 105.437" 
+                      value={newRepairKm}
+                      onChange={(e) => setNewRepairKm(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Şase Numarası</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: WUW222612244008293" 
+                      value={newRepairChassis}
+                      onChange={(e) => setNewRepairChassis(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
                 </div>
 
-                {showExtraInputs && (
-                  <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kilometre (KM)</label>
-                      <input 
-                        type="text" 
-                        placeholder="Örn: 105.437" 
-                        value={newRepairKm}
-                        onChange={(e) => setNewRepairKm(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Şase Numarası</label>
-                      <input 
-                        type="text" 
-                        placeholder="Örn: WUW222612244008293" 
-                        value={newRepairChassis}
-                        onChange={(e) => setNewRepairChassis(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Motor Numarası</label>
-                      <input 
-                        type="text" 
-                        placeholder="Örn: CJZC12926" 
-                        value={newRepairMotorNo}
-                        onChange={(e) => setNewRepairMotorNo(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Aracı Getiren Kişi</label>
-                      <input 
-                        type="text" 
-                        placeholder="Müşteriden farklıysa girin" 
-                        value={newRepairBroughtBy}
-                        onChange={(e) => setNewRepairBroughtBy(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: 'span 2' }}>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Servis Danışmanı</label>
-                      <input 
-                        type="text" 
-                        placeholder="Örn: İbrahim BALTA" 
-                        value={newRepairAdvisor}
-                        onChange={(e) => setNewRepairAdvisor(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Motor Numarası</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: CJZC12926" 
+                      value={newRepairMotorNo}
+                      onChange={(e) => setNewRepairMotorNo(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
                   </div>
-                )}
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Aracı Getiren Kişi</label>
+                    <input 
+                      type="text" 
+                      placeholder="Müşteriden farklıysa girin" 
+                      value={newRepairBroughtBy}
+                      onChange={(e) => setNewRepairBroughtBy(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: 'span 2' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Servis Danışmanı</label>
+                    <input 
+                      type="text" 
+                      placeholder="Örn: İbrahim BALTA" 
+                      value={newRepairAdvisor}
+                      onChange={(e) => setNewRepairAdvisor(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                    />
+                  </div>
+                </div>
 
                 <button type="submit" className="glow-btn" style={{ width: '100%', padding: '12px', fontSize: '1rem', fontWeight: 'bold' }}>
                   Aracı Atölyeye Kabul Et (Aktif İşlere Ekle)
