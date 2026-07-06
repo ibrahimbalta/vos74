@@ -151,179 +151,128 @@ export default function Tracker({ activeRepairs, updateRepairStatus, addExtraCos
                   </div>
                 </div>
 
-                {/* Details grid */}
-                <div className="car-details-grid">
-                  <div className="detail-box glass">
-                    <h5>Yapılan İşlemler</h5>
-                    <ul className="details-checklist">
-                      {trackingCar.jobsDone.map((j, jIdx) => {
-                        const jobName = typeof j === 'object' ? j.name : j;
-                        const jobCost = typeof j === 'object' ? j.cost : 0;
-                        return (
-                          <li key={jIdx} className="checked-job" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <CheckCircle size={14} className="check-icon" />
+                {/* Details list */}
+                <div style={{ maxWidth: '600px', margin: '32px auto 0', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="detail-box glass" style={{ padding: '24px', borderRadius: '16px' }}>
+                    <h5 style={{ fontSize: '1.1rem', margin: '0 0 16px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle size={18} style={{ color: 'var(--primary)' }} />
+                      <span>Aracınıza Yapılan İşlemler</span>
+                    </h5>
+                    <ul className="details-checklist" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {trackingCar.jobsDone && trackingCar.jobsDone.length > 0 ? (
+                        trackingCar.jobsDone.map((j, jIdx) => {
+                          const jobName = typeof j === 'object' ? j.name : j;
+                          return (
+                            <li key={jIdx} className="checked-job" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                              <CheckCircle size={16} className="check-icon" style={{ color: 'var(--primary)', marginTop: '3px', flexShrink: 0 }} />
                               <span>{jobName}</span>
-                            </div>
-                            <span style={{ fontWeight: 'bold', color: 'var(--primary)', fontSize: '0.85rem' }}>{jobCost} TL</span>
-                          </li>
-                        );
-                      })}
+                            </li>
+                          );
+                        })
+                      ) : (
+                        <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Kabul işlemleri tamamlandı, arıza tespiti bekleniyor.</li>
+                      )}
                     </ul>
                     {trackingCar.notes && (
-                      <div className="mechanic-note">
-                        <strong>Usta Notu:</strong>
-                        <p>{trackingCar.notes}</p>
+                      <div className="mechanic-note" style={{ marginTop: '20px', padding: '12px 16px', background: 'rgba(6, 182, 212, 0.05)', borderRadius: '8px', borderLeft: '3px solid var(--primary)' }}>
+                        <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary)', marginBottom: '4px' }}>Usta Notu:</strong>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{trackingCar.notes}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="detail-box glass invoice-details tracker-print-area">
-                    <h5>Maliyet & Onay Listesi</h5>
-                    {trackingCar.jobsDone && trackingCar.jobsDone.map((j, jIdx) => {
-                      const jobName = typeof j === 'object' ? j.name : j;
-                      const jobCost = typeof j === 'object' ? j.cost : 0;
-                      return (
-                        <div key={`job-${jIdx}`} className="invoice-row">
-                          <span>{jobName}</span>
-                          <strong>{jobCost} TL</strong>
-                        </div>
-                      );
-                    })}
-                    
-                    {trackingCar.extraItems && trackingCar.extraItems.map((ex, exIdx) => (
-                      <div key={exIdx} className="invoice-row extra">
-                        <span>➕ {ex.name}</span>
-                        <strong>{ex.cost} TL</strong>
+                  {/* Sorumlu Usta / Teknisyen Bilgisi */}
+                  {trackingCar.assignedUsta && (
+                    <div className="detail-box glass" style={{ padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(6, 182, 212, 0.1)', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>👨‍🔧</div>
+                      <div>
+                        <h6 style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Servis Sorumlu Ustası</h6>
+                        <h5 style={{ margin: '2px 0 0 0', fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{trackingCar.assignedUsta}</h5>
                       </div>
-                    ))}
-
-                    <div className="invoice-total">
-                      <span>Toplam Tutar</span>
-                      <span className="total-price text-gradient">
-                        {(trackingCar.jobsDone ? trackingCar.jobsDone.reduce((acc, current) => acc + (current.cost || 0), 0) : 0) +
-                         (trackingCar.extraItems ? trackingCar.extraItems.reduce((acc, current) => acc + current.cost, 0) : 0)} TL
-                      </span>
                     </div>
+                  )}
 
-                    <button 
-                      onClick={() => window.print()}
-                      className="glow-btn-secondary full-width no-print"
-                      style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '8px', padding: '10px 16px', fontSize: '0.85rem' }}
-                    >
-                      <FileText size={16} />
-                      <span>Faturayı Yazdır / PDF Kaydet</span>
-                    </button>
-
-                    {/* Pending Approval simulation */}
-                    {trackingCar.pendingApproval && (
-                      <div className="pending-approval-card pulse-glow no-print" style={{ marginTop: '16px' }}>
-                        <div className="approval-desc">
-                          <AlertTriangle size={18} className="warn-icon" />
-                          <div>
-                            <strong>Ekstra Onarım Talebi</strong>
-                            <p>{trackingCar.pendingApproval.item} aşınmış/hasarlı, değişmesi gerekiyor. (+{trackingCar.pendingApproval.cost} TL)</p>
+                  {/* CUSTOMER REVIEW FORM - only when car is ready */}
+                  {trackingCar.status === 'hazir' && (
+                    <div className="customer-review-section no-print" style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(6, 182, 212, 0.01))', border: '1px dashed var(--primary)', borderRadius: '16px' }}>
+                      {!feedbackSubmitted ? (
+                        <>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                            <MessageCircle size={20} className="text-gradient" />
+                            <h5 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 'bold' }}>Hizmetimizi Değerlendirin</h5>
                           </div>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                            Aracınız teslime hazır! Deneyiminizi puanlayın ve yorumunuzla diğer müşterilere yol gösterin.
+                          </p>
+
+                          {/* Star Rating */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: 'var(--text-secondary)' }}>Puanınız</label>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              {[1, 2, 3, 4, 5].map((starVal) => (
+                                <button
+                                  key={starVal}
+                                  type="button"
+                                  onClick={() => setRating(starVal)}
+                                  onMouseEnter={() => setHoverRating(starVal)}
+                                  onMouseLeave={() => setHoverRating(0)}
+                                  style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '4px',
+                                    transition: 'transform 0.2s ease',
+                                    transform: (hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? 'scale(1.2)' : 'scale(1)'
+                                  }}
+                                >
+                                  <Star
+                                    size={28}
+                                    fill={(hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? '#f59e0b' : 'transparent'}
+                                    color={(hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? '#f59e0b' : 'var(--text-secondary)'}
+                                  />
+                                </button>
+                              ))}
+                              <span style={{ marginLeft: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)', alignSelf: 'center', fontWeight: 'bold' }}>
+                                {rating}/5
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Comment Textarea */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block', color: 'var(--text-secondary)' }}>Yorumunuz</label>
+                            <textarea
+                              rows="3"
+                              placeholder="Aldığınız hizmeti değerlendirin... (Örn: Ustalar çok ilgiliydi, aracım çok temiz teslim edildi.)"
+                              value={commentText}
+                              onChange={(e) => setCommentText(e.target.value)}
+                              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', resize: 'vertical', outline: 'none', boxSizing: 'border-box' }}
+                            />
+                          </div>
+
+                          <button
+                            className="glow-btn"
+                            onClick={handleSubmitReview}
+                            disabled={!commentText.trim()}
+                            style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '0.95rem', opacity: commentText.trim() ? 1 : 0.5, fontWeight: 'bold' }}
+                          >
+                            <Star size={16} style={{ marginRight: '6px' }} />
+                            <span>Yorumu Gönder</span>
+                          </button>
+                        </>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                          <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                            <CheckCircle size={32} style={{ color: '#22c55e' }} />
+                          </div>
+                          <h5 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 'bold' }}>Teşekkür Ederiz!</h5>
+                          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                            Değerlendirmeniz başarıyla kaydedildi. Yorumunuz ana sayfamızda yayınlanacaktır. Bizleri tercih ettiğiniz için teşekkürler! 🙏
+                          </p>
                         </div>
-                        
-                        {successMsg ? (
-                          <div className="success-banner">{successMsg}</div>
-                        ) : (
-                          <div className="approval-actions">
-                            <button 
-                              className="approve-btn"
-                              onClick={() => handleApproval(trackingCar.id, trackingCar.pendingApproval.cost, trackingCar.pendingApproval.item)}
-                            >
-                              Değişimi Onayla
-                            </button>
-                            <span className="approval-hint">Siz onay vermeden işlem yapılmaz.</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* CUSTOMER REVIEW FORM - only when car is ready */}
-                    {trackingCar.status === 'hazir' && (
-                      <div className="customer-review-section no-print" style={{ marginTop: '20px', padding: '24px', background: 'linear-gradient(135deg, rgba(var(--primary-rgb, 255, 152, 0), 0.05), rgba(var(--primary-rgb, 255, 152, 0), 0.02))', border: '1px dashed var(--primary, #ff9800)', borderRadius: '12px' }}>
-                        {!feedbackSubmitted ? (
-                          <>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                              <MessageCircle size={20} className="text-gradient" />
-                              <h5 style={{ margin: 0, fontSize: '1.05rem' }}>Hizmetimizi Değerlendirin</h5>
-                            </div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                              Aracınız teslime hazır! Deneyiminizi puanlayın ve yorumunuzla diğer müşterilere yol gösterin.
-                            </p>
-
-                            {/* Star Rating */}
-                            <div style={{ marginBottom: '16px' }}>
-                              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>Puanınız</label>
-                              <div style={{ display: 'flex', gap: '6px' }}>
-                                {[1, 2, 3, 4, 5].map((starVal) => (
-                                  <button
-                                    key={starVal}
-                                    type="button"
-                                    onClick={() => setRating(starVal)}
-                                    onMouseEnter={() => setHoverRating(starVal)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    style={{
-                                      background: 'transparent',
-                                      border: 'none',
-                                      cursor: 'pointer',
-                                      padding: '4px',
-                                      transition: 'transform 0.2s ease',
-                                      transform: (hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? 'scale(1.2)' : 'scale(1)'
-                                    }}
-                                  >
-                                    <Star
-                                      size={28}
-                                      fill={(hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? '#f59e0b' : 'transparent'}
-                                      color={(hoverRating >= starVal || (!hoverRating && rating >= starVal)) ? '#f59e0b' : 'var(--text-secondary)'}
-                                    />
-                                  </button>
-                                ))}
-                                <span style={{ marginLeft: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)', alignSelf: 'center' }}>
-                                  {rating}/5
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Comment Textarea */}
-                            <div style={{ marginBottom: '16px' }}>
-                              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>Yorumunuz</label>
-                              <textarea
-                                rows="3"
-                                placeholder="Aldığınız hizmeti değerlendirin... (Örn: Ustalar çok ilgiliydi, aracım çok temiz teslim edildi.)"
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', resize: 'vertical', outline: 'none', boxSizing: 'border-box' }}
-                              />
-                            </div>
-
-                            <button
-                              className="glow-btn"
-                              onClick={handleSubmitReview}
-                              disabled={!commentText.trim()}
-                              style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '0.95rem', opacity: commentText.trim() ? 1 : 0.5 }}
-                            >
-                              <Star size={16} />
-                              <span>Yorumu Gönder</span>
-                            </button>
-                          </>
-                        ) : (
-                          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                              <CheckCircle size={32} style={{ color: '#22c55e' }} />
-                            </div>
-                            <h5 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>Teşekkür Ederiz!</h5>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
-                              Değerlendirmeniz başarıyla kaydedildi. Yorumunuz ana sayfamızda yayınlanacaktır. Bizleri tercih ettiğiniz için teşekkürler! 🙏
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
