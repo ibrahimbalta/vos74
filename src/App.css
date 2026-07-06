@@ -940,6 +940,16 @@
 .team-card {
   padding: 0;
   overflow: hidden;
+  max-width: 365px;
+  width: 100%;
+  margin: 0 auto;
+  transition: var(--theme-transition);
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.4);
 }
 
 .avatar-container {
