@@ -22,6 +22,7 @@ export default function UstaDashboard({
   addPendingRequest, 
   addActiveRepair,
   updateRepairBayAndUsta,
+  deleteActiveRepair,
   listings, 
   addMarketplaceListing,
   
@@ -988,10 +989,36 @@ _Vos74 VAG Grubu Özel Servis_`;
                   </button>
                 </div>
 
+                <button 
+                  className="glow-btn-danger full-width"
+                  style={{ 
+                    marginTop: '8px', 
+                    justifyContent: 'center', 
+                    background: '#ef4444', 
+                    border: 'none', 
+                    color: '#fff', 
+                    fontSize: '0.8rem', 
+                    padding: '8px 12px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '6px',
+                    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.2)',
+                    fontWeight: '600'
+                  }}
+                  onClick={() => {
+                    if (window.confirm(`${car.plate} plakalı aracın kaydını tamamen silmek istediğinize emin misiniz?`)) {
+                      deleteActiveRepair && deleteActiveRepair(car.id);
+                    }
+                  }}
+                >
+                  <Trash size={14} />
+                  <span>Kabul Formunu Sil / İşi İptal Et</span>
+                </button>
+
                 {car.status === 'hazir' && (
                   <button 
                     className="glow-btn full-width"
-                    style={{ marginTop: '12px', justifyContent: 'center', background: '#22c55e', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}
+                    style={{ marginTop: '8px', justifyContent: 'center', background: '#22c55e', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}
                     onClick={() => completeRepairJob && completeRepairJob(car.id)}
                   >
                     <Check size={16} />

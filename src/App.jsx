@@ -660,6 +660,15 @@ function App() {
     }
   };
 
+  const deleteActiveRepair = async (id) => {
+    setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));
+    try {
+      await deleteDoc(doc(db, "activeRepairs", String(id)));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const addRepairJob = async (id, newJobText, cost) => {
     const updated = activeRepairs.map(car => 
       String(car.id) === String(id) ? { 
@@ -973,6 +982,7 @@ function App() {
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
               updateRepairBayAndUsta={updateRepairBayAndUsta}
+              deleteActiveRepair={deleteActiveRepair}
               listings={listings}
               addMarketplaceListing={addMarketplaceListing}
               blogs={blogs}
