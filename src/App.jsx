@@ -285,7 +285,9 @@ const initialActiveRepairs = [
     ],
     extraItems: [],
     pendingApproval: { item: 'Ön Fren Balataları', cost: 950 },
-    deliveryTime: 'Bugün 17:30'
+    deliveryTime: 'Bugün 17:30',
+    bayId: 'lift3',
+    assignedUsta: 'Nuri Usta'
   },
   {
     id: 2,
@@ -301,7 +303,9 @@ const initialActiveRepairs = [
     ],
     extraItems: [],
     pendingApproval: null,
-    deliveryTime: 'Yarın 12:00'
+    deliveryTime: 'Yarın 12:00',
+    bayId: 'electric',
+    assignedUsta: 'Selim Usta'
   },
   {
     id: 3,
@@ -317,7 +321,9 @@ const initialActiveRepairs = [
     ],
     extraItems: [{ name: 'Bosch Silecek Süpürgeleri', cost: 350 }],
     pendingApproval: null,
-    deliveryTime: 'Teslime Hazır'
+    deliveryTime: 'Teslime Hazır',
+    bayId: 'paint',
+    assignedUsta: 'Recai Usta'
   }
 ];
 
@@ -585,7 +591,7 @@ function App() {
     setAppointments(appointments.map(a => a.id === id ? { ...a, status: 'approved' } : a));
 
     const newRepair = {
-      id: activeRepairs.length + 1,
+      id: activeRepairs.length > 0 ? Math.max(...activeRepairs.map(r => Number(r.id) || 0)) + 1 : 1,
       plate: targetApt.plate,
       model: `${targetApt.brand} ${targetApt.model} (${targetApt.year})`,
       owner: targetApt.ownerName,
@@ -595,7 +601,9 @@ function App() {
       jobsDone: [{ name: `Kabul formu dolduruldu: ${targetApt.service}`, cost: 2000 }],
       extraItems: [],
       pendingApproval: null,
-      deliveryTime: 'İnceleme Sonrası Belirlenecek'
+      deliveryTime: 'İnceleme Sonrası Belirlenecek',
+      bayId: 'lift1',
+      assignedUsta: 'Nuri Usta'
     };
 
     setActiveRepairs([newRepair, ...activeRepairs]);
@@ -623,6 +631,22 @@ function App() {
   const updateRepairStatus = async (id, newStatus) => {
     const updatedRepairs = activeRepairs.map(car => 
       car.id === id ? { ...car, status: newStatus, deliveryTime: newStatus === 'hazir' ? 'Teslime Hazır' : car.deliveryTime } : car
+    );
+    setActiveRepairs(updatedRepairs);
+    
+    const targetCar = updatedRepairs.find(c => c.id === id);
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const updateRepairBayAndUsta = async (id, bayId, assignedUsta) => {
+    const updatedRepairs = activeRepairs.map(car => 
+      car.id === id ? { ...car, bayId, assignedUsta } : car
     );
     setActiveRepairs(updatedRepairs);
     
@@ -948,6 +972,7 @@ function App() {
               updateRepairJobCost={updateRepairJobCost}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
+              updateRepairBayAndUsta={updateRepairBayAndUsta}
               listings={listings}
               addMarketplaceListing={addMarketplaceListing}
               blogs={blogs}

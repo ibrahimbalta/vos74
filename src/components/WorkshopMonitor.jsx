@@ -5,21 +5,7 @@ export default function WorkshopMonitor({ activeRepairs }) {
   
   // Map active repairs to workshop bays dynamically
   const getBayStatus = (bayId) => {
-    switch (bayId) {
-      case 'lift1':
-        return activeRepairs.find(r => r.plate === '34ABC123') || null;
-      case 'lift2':
-        return activeRepairs.find(r => r.plate === '06USTA99') || null;
-      case 'lift3':
-        // Let's see if there is any other active repair
-        return activeRepairs.find(r => r.plate !== '34ABC123' && r.plate !== '06USTA99' && r.status !== 'hazir') || null;
-      case 'paint':
-        return activeRepairs.find(r => r.status === 'hazir' || r.plate === '35OTO55') || null;
-      case 'electric':
-        return activeRepairs.find(r => r.plate === '34TEST99' || r.status === 'ariza') || null;
-      default:
-        return null;
-    }
+    return activeRepairs.find(r => r.bayId === bayId) || null;
   };
 
   const bays = [
@@ -91,6 +77,11 @@ export default function WorkshopMonitor({ activeRepairs }) {
                   <div className="bay-car-info">
                     <h5>{car.model}</h5>
                     <span className="bay-customer-lbl">Müşteri: {car.owner}</span>
+                    {car.assignedUsta && (
+                      <span className="bay-usta-lbl" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--primary)', marginTop: '4px', fontWeight: 'bold' }}>
+                        🛠️ Usta: {car.assignedUsta}
+                      </span>
+                    )}
                   </div>
 
                   <div className="bay-status-row">

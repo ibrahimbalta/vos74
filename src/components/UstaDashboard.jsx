@@ -21,6 +21,7 @@ export default function UstaDashboard({
   updateRepairJobCost,
   addPendingRequest, 
   addActiveRepair,
+  updateRepairBayAndUsta,
   listings, 
   addMarketplaceListing,
   
@@ -75,6 +76,14 @@ export default function UstaDashboard({
   const [newRepairPhone, setNewRepairPhone] = useState('');
   const [newRepairService, setNewRepairService] = useState('');
   const [newRepairCost, setNewRepairCost] = useState('');
+  const [newRepairBay, setNewRepairBay] = useState('lift1');
+  const [newRepairUsta, setNewRepairUsta] = useState('');
+
+  React.useEffect(() => {
+    if (team && team.length > 0 && !newRepairUsta) {
+      setNewRepairUsta(team[0].name);
+    }
+  }, [team]);
 
   const handleCreateActiveRepair = (e) => {
     e.preventDefault();
@@ -95,7 +104,9 @@ export default function UstaDashboard({
       jobsDone: newRepairService ? [{ name: newRepairService, cost: costVal }] : [],
       extraItems: [],
       pendingApproval: null,
-      deliveryTime: 'İnceleme Sonrası Belirlenecek'
+      deliveryTime: 'İnceleme Sonrası Belirlenecek',
+      bayId: newRepairBay,
+      assignedUsta: newRepairUsta || (team[0]?.name || '')
     };
 
     if (addActiveRepair) {
@@ -699,7 +710,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                   </div>
                 </div>
 
-                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
                   <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Yapılacak İlk İşlem / Şikayet</label>
                     <input 
@@ -722,6 +733,35 @@ _Vos74 VAG Grubu Özel Servis_`;
                   </div>
                 </div>
 
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Atanacak Lift / İstasyon *</label>
+                    <select 
+                      value={newRepairBay} 
+                      onChange={(e) => setNewRepairBay(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                    >
+                      <option value="lift1">Lift 1 (Mekanik)</option>
+                      <option value="lift2">Lift 2 (Motor)</option>
+                      <option value="lift3">Lift 3 (Hızlı Bakım)</option>
+                      <option value="electric">İstasyon 4 (Oto Elektrik)</option>
+                      <option value="paint">Boya Fırını & Estetik</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Görevli Usta *</label>
+                    <select 
+                      value={newRepairUsta} 
+                      onChange={(e) => setNewRepairUsta(e.target.value)}
+                      style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                    >
+                      {team.map(t => (
+                        <option key={t.id} value={t.name}>{t.name} ({t.role.split(' ')[0]})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <button type="submit" className="glow-btn" style={{ width: '100%', padding: '12px', fontSize: '1rem', fontWeight: 'bold' }}>
                   Aracı Atölyeye Kabul Et (Aktif İşlere Ekle)
                 </button>
@@ -738,6 +778,37 @@ _Vos74 VAG Grubu Özel Servis_`;
                     <span className="plate-badge-large">{car.plate}</span>
                     <h4>{car.model}</h4>
                     <span className="owner-txt">Müşteri: {car.owner} ({car.phone})</span>
+                    
+                    {/* Dynamic Lift and Usta Selectors */}
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '12px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }} className="no-print">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Atanan Alan / Lift</label>
+                        <select
+                          value={car.bayId || 'lift1'}
+                          onChange={(e) => updateRepairBayAndUsta && updateRepairBayAndUsta(car.id, e.target.value, car.assignedUsta || (team[0]?.name || ''))}
+                          style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', outline: 'none', width: '100%' }}
+                        >
+                          <option value="lift1">Lift 1 (Mekanik)</option>
+                          <option value="lift2">Lift 2 (Motor)</option>
+                          <option value="lift3">Lift 3 (Hızlı Bakım)</option>
+                          <option value="electric">İstasyon 4 (Oto Elektrik)</option>
+                          <option value="paint">Boya Fırını & Estetik</option>
+                        </select>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Görevli Usta</label>
+                        <select
+                          value={car.assignedUsta || (team[0]?.name || '')}
+                          onChange={(e) => updateRepairBayAndUsta && updateRepairBayAndUsta(car.id, car.bayId || 'lift1', e.target.value)}
+                          style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', outline: 'none', width: '100%' }}
+                        >
+                          {team.map(t => (
+                            <option key={t.id} value={t.name}>{t.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                   <div className="price-tag-big text-gradient">
                     {(car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) + (car.extraItems ? car.extraItems.reduce((a, b) => a + b.cost, 0) : 0)} TL
