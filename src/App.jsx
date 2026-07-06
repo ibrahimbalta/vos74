@@ -630,11 +630,11 @@ function App() {
   // Active Repairs Actions
   const updateRepairStatus = async (id, newStatus) => {
     const updatedRepairs = activeRepairs.map(car => 
-      car.id === id ? { ...car, status: newStatus, deliveryTime: newStatus === 'hazir' ? 'Teslime Hazır' : car.deliveryTime } : car
+      String(car.id) === String(id) ? { ...car, status: newStatus, deliveryTime: newStatus === 'hazir' ? 'Teslime Hazır' : car.deliveryTime } : car
     );
     setActiveRepairs(updatedRepairs);
     
-    const targetCar = updatedRepairs.find(c => c.id === id);
+    const targetCar = updatedRepairs.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -646,11 +646,11 @@ function App() {
 
   const updateRepairBayAndUsta = async (id, bayId, assignedUsta) => {
     const updatedRepairs = activeRepairs.map(car => 
-      car.id === id ? { ...car, bayId, assignedUsta } : car
+      String(car.id) === String(id) ? { ...car, bayId, assignedUsta } : car
     );
     setActiveRepairs(updatedRepairs);
     
-    const targetCar = updatedRepairs.find(c => c.id === id);
+    const targetCar = updatedRepairs.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -662,13 +662,13 @@ function App() {
 
   const addRepairJob = async (id, newJobText, cost) => {
     const updated = activeRepairs.map(car => 
-      car.id === id ? { 
+      String(car.id) === String(id) ? { 
         ...car, 
         jobsDone: [...car.jobsDone, { name: newJobText, cost: Number(cost) || 0 }] 
       } : car
     );
     setActiveRepairs(updated);
-    const targetCar = updated.find(c => c.id === id);
+    const targetCar = updated.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -680,13 +680,13 @@ function App() {
 
   const deleteRepairJob = async (id, jobIndex) => {
     const updated = activeRepairs.map(car => 
-      car.id === id ? { 
+      String(car.id) === String(id) ? { 
         ...car, 
         jobsDone: car.jobsDone.filter((_, idx) => idx !== jobIndex) 
       } : car
     );
     setActiveRepairs(updated);
-    const targetCar = updated.find(c => c.id === id);
+    const targetCar = updated.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -698,7 +698,7 @@ function App() {
 
   const updateRepairJobCost = async (id, jobIndex, newCost) => {
     const updated = activeRepairs.map(car => 
-      car.id === id ? { 
+      String(car.id) === String(id) ? { 
         ...car, 
         jobsDone: car.jobsDone.map((job, idx) => 
           idx === jobIndex ? { ...job, cost: Number(newCost) || 0 } : job
@@ -706,7 +706,7 @@ function App() {
       } : car
     );
     setActiveRepairs(updated);
-    const targetCar = updated.find(c => c.id === id);
+    const targetCar = updated.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -718,10 +718,10 @@ function App() {
 
   const addPendingRequest = async (id, itemName, cost) => {
     const updated = activeRepairs.map(car => 
-      car.id === id ? { ...car, pendingApproval: { item: itemName, cost: cost } } : car
+      String(car.id) === String(id) ? { ...car, pendingApproval: { item: itemName, cost: cost } } : car
     );
     setActiveRepairs(updated);
-    const targetCar = updated.find(c => c.id === id);
+    const targetCar = updated.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -733,7 +733,7 @@ function App() {
 
   const addExtraCostApproval = async (id, cost, itemName) => {
     const updated = activeRepairs.map(car => {
-      if (car.id === id) {
+      if (String(car.id) === String(id)) {
         return {
           ...car,
           extraItems: [...(car.extraItems || []), { name: itemName, cost: cost }],
@@ -743,7 +743,7 @@ function App() {
       return car;
     });
     setActiveRepairs(updated);
-    const targetCar = updated.find(c => c.id === id);
+    const targetCar = updated.find(c => String(c.id) === String(id));
     if (targetCar) {
       try {
         await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
@@ -754,7 +754,7 @@ function App() {
   };
 
   const completeRepairJob = async (id) => {
-    const targetCar = activeRepairs.find(c => c.id === id);
+    const targetCar = activeRepairs.find(c => String(c.id) === String(id));
     if (!targetCar) return;
 
     const jobsTotal = targetCar.jobsDone ? targetCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
@@ -767,10 +767,10 @@ function App() {
       date: new Date().toLocaleDateString('tr-TR'),
       desc: targetCar.jobsDone.map(j => typeof j === 'object' ? j.name : j).join(', '),
       cost: totalCost,
-      master: 'Nuri Usta'
+      master: targetCar.assignedUsta || 'Nuri Usta'
     };
 
-    setActiveRepairs(activeRepairs.filter(c => c.id !== id));
+    setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));
     setCompletedRepairs([historyRecord, ...completedRepairs]);
     alert(`${targetCar.plate} plakalı aracın işlemleri tamamlandı ve müşteri geçmişine kaydedildi.`);
 
