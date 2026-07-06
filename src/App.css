@@ -458,7 +458,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: 380px;
+  height: 450px;
 }
 
 .bay-card.occupied {
@@ -635,21 +635,31 @@
 .bay-jobs-snippet {
   margin-top: auto;
   border-top: 1px dashed var(--border-color);
-  padding-top: 8px;
+  padding: 10px 12px;
+  background: rgba(6, 182, 212, 0.03);
+  border: 1px solid rgba(6, 182, 212, 0.12);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .bay-jobs-snippet small {
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: var(--primary);
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .bay-jobs-snippet p {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 /* Empty Bay Body */
