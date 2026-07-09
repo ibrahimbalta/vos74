@@ -662,12 +662,22 @@ input:focus, select:focus, textarea:focus {
     color: #000000 !important;
   }
   
-  /* Hide all main elements */
-  #root > .app-container > .main-content > section,
+  /* Hide all main elements except sections containing active print overlays */
+  #root > .app-container > .main-content > section:not(:has(.print-invoice-modal-overlay)):not(:has(.tracker-print-area)),
   #root > .app-container > .navbar, 
   #root > .app-container > .footer, 
   #root > .app-container > .demo-controller-wrapper,
   .no-print {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide other children inside the printing section to prevent bleeding */
+  #root > .app-container > .main-content > section:has(.print-invoice-modal-overlay) > *:not(.print-invoice-modal-overlay),
+  #root > .app-container > .main-content > section:has(.tracker-print-area) > *:not(.tracker-print-area) {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
