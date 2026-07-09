@@ -801,6 +801,15 @@ function App() {
     }
   };
 
+  const deleteMarketplaceListing = async (id) => {
+    setListings(listings.filter(item => String(item.id) !== String(id)));
+    try {
+      await deleteDoc(doc(db, "listings", String(id)));
+    } catch (e) {
+      console.error("Firestore deleteMarketplaceListing failed:", e);
+    }
+  };
+
   // Blog Actions
   const addBlogPost = async (newPost) => {
     setBlogs([newPost, ...blogs]);
@@ -985,6 +994,7 @@ function App() {
               deleteActiveRepair={deleteActiveRepair}
               listings={listings}
               addMarketplaceListing={addMarketplaceListing}
+              deleteMarketplaceListing={deleteMarketplaceListing}
               blogs={blogs}
               addBlogPost={addBlogPost}
               deleteBlogPost={deleteBlogPost}

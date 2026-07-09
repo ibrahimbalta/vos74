@@ -25,6 +25,7 @@ export default function UstaDashboard({
   deleteActiveRepair,
   listings, 
   addMarketplaceListing,
+  deleteMarketplaceListing,
   
   // CMS Props
   branchDetails,
@@ -1235,6 +1236,18 @@ _Vos74 VAG Grubu Özel Servis_`;
                     <strong className="row-title">{item.title}</strong>
                     <span className="row-price">{item.price.toLocaleString('tr-TR')} TL</span>
                   </div>
+                  <button 
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => {
+                      if (window.confirm(`${item.title} ilanını silmek istediğinize emin misiniz?`)) {
+                        deleteMarketplaceListing && deleteMarketplaceListing(item.id);
+                      }
+                    }}
+                    title="İlanı Sil"
+                  >
+                    <Trash size={15} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -2260,7 +2273,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                 <tbody>
                   <tr>
                     <td style={{ width: '55%', border: '1px solid #000', padding: '8px', verticalAlign: 'top' }}>
-                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>ETKİLİ SERVİS</h3>
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>VOLKSWAGEN ÖZEL SERVİS</h3>
                       <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000' }}><strong>{printingCar.assignedUsta || 'Kadir GÜL'}:</strong> 0532 637 39 78</p>
                       <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000', lineHeight: '1.3' }}><strong>ADRES:</strong> Gölbucağı Mah. Yeni Sanayi Sitesi Cami Sok. 13 / BARTIN</p>
                     </td>
@@ -2286,7 +2299,7 @@ _Vos74 VAG Grubu Özel Servis_`;
 
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
                         <img src="/logo.png" alt="Vos74" style={{ maxHeight: '40px', width: 'auto', objectFit: 'contain' }} />
-                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ef4444', margin: '2px 0 0 0', letterSpacing: '0.5px' }}>ETKİLİ SERVİS</span>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ef4444', margin: '2px 0 0 0', letterSpacing: '0.5px' }}>VOLKSWAGEN ÖZEL SERVİS</span>
                       </div>
                     </td>
                   </tr>
