@@ -32,31 +32,34 @@ export async function seedDatabaseIfEmpty(initialData) {
     // 1. Seed settings
     const settingsDocRef = doc(db, "settings", "general");
     const settingsSnap = await getDoc(settingsDocRef);
-    if (!settingsSnap.exists()) {
-      console.log("Seeding settings collection...");
-      await setDoc(settingsDocRef, {
-        socialLinks: initialData.socialLinks,
-        beforeAfterData: initialData.beforeAfterData,
-        workingHours: initialData.workingHours,
-        team: initialData.team,
-        branchDetails: initialData.branchDetails
-      });
+    
+    // If settings document already exists, the database is already initialized/seeded.
+    // We should not seed any collection (even if some of them are empty because the user deleted their contents).
+    if (settingsSnap.exists()) {
+      console.log("Firestore database already initialized. Skipping seeding.");
+      return;
     }
+
+    console.log("Seeding settings collection...");
+    await setDoc(settingsDocRef, {
+      socialLinks: initialData.socialLinks,
+      beforeAfterData: initialData.beforeAfterData,
+      workingHours: initialData.workingHours,
+      team: initialData.team,
+      branchDetails: initialData.branchDetails
+    });
 
     // Helper to seed standard list collections
     const seedListCollection = async (colName, list) => {
       const colRef = collection(db, colName);
-      const snapshot = await getDocs(colRef);
-      if (snapshot.empty) {
-        console.log(`Seeding ${colName} collection...`);
-        for (const item of list) {
-          // Convert numeric IDs to string for doc ID if possible, otherwise let addDoc auto-generate
-          if (item.id) {
-            const docId = String(item.id);
-            await setDoc(doc(db, colName, docId), item);
-          } else {
-            await addDoc(colRef, item);
-          }
+      console.log(`Seeding ${colName} collection...`);
+      for (const item of list) {
+        // Convert numeric IDs to string for doc ID if possible, otherwise let addDoc auto-generate
+        if (item.id) {
+          const docId = String(item.id);
+          await setDoc(doc(db, colName, docId), item);
+        } else {
+          await addDoc(colRef, item);
         }
       }
     };

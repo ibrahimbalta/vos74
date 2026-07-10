@@ -453,22 +453,22 @@ function App() {
         };
 
         const apts = await fetchCol("appointments");
-        if (apts.length > 0) setAppointments(apts);
+        setAppointments(apts);
 
         const active = await fetchCol("activeRepairs");
-        if (active.length > 0) setActiveRepairs(active);
+        setActiveRepairs(active);
 
         const completed = await fetchCol("completedRepairs");
-        if (completed.length > 0) setCompletedRepairs(completed);
+        setCompletedRepairs(completed);
 
         const list = await fetchCol("listings");
-        if (list.length > 0) setListings(list);
+        setListings(list);
 
         const blgs = await fetchCol("blogs");
-        if (blgs.length > 0) setBlogs(blgs);
+        setBlogs(blgs);
 
         const cards = await fetchCol("customerCards");
-        if (cards.length > 0) setCustomerCards(cards);
+        setCustomerCards(cards);
 
       } catch (error) {
         console.error("Firestore database loading failed:", error);
