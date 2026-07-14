@@ -22,6 +22,56 @@ const defaultBlogs = [
     date: '03.06.2026',
     author: 'Vos74 Kadir Usta',
     category: 'Mekanik'
+  },
+  {
+    id: 'blog-3',
+    title: 'DSG Şanzıman Arızaları: Mekatronik ve Kavrama Sorunları Nasıl Çözülür?',
+    summary: 'DSG şanzımanlarda sık karşılaşılan mekatronik arızaları, vites geçişlerindeki sarsıntılar ve kavrama aşınmalarının tespiti ile profesyonel çözüm yolları.',
+    content: 'VAG grubunun (Volkswagen, Audi, Seat, Skoda) çift kavramalı şanzıman sistemi olan DSG, sürüş konforu ve yakıt tasarrufu açısından mükemmeldir. Ancak, zamanla mekatronik ünitesinde basınç kayıpları, kart arızaları veya çift kavramada (debriyaj) aşınmalar meydana gelebilir. Özellikle trafikte aşırı ısınma, göstergede İngiliz anahtarı işareti çıkması veya vites geçişlerinde titreme bu sorunların en net belirtileridir.\n\nBartın\'da DSG şanzıman sorunlarına profesyonel çözümler sunan vos74 bartın özel servisimizde, en karmaşık şanzıman arızaları bile kısa sürede çözüme kavuşturulmaktadır. Servisimizde usta olarak kadir gül ve deneyimli ekibimiz, DSG mekatronik tamiri, solenoid değişimi, güçlendirilmiş tüp montajı ve kavrama değişimlerini garantili olarak gerçekleştirmektedir.\n\nDSG şanzımanınızın ömrünü uzatmak ve yüksek maliyetli arızalardan kaçınmak için periyodik adaptasyon ve şanzıman yağı değişimlerini ihmal etmeyin. Detaylı bilgi ve randevu işlemleri için vos74.com.tr web sitemizi ziyaret edebilir, vos74 seo uyumlu arıza tespit bloglarımızla araç sağlığınızı nasıl koruyacağınızı öğrenebilirsiniz.',
+    image: '/workshop_panorama.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Şanzıman'
+  },
+  {
+    id: 'blog-4',
+    title: 'TSI ve TFSI Motorların Kronik Sorunları: Yağ Eksiltme ve Triger Zincir Uzaması',
+    summary: 'Volkswagen grubu TSI ve TFSI motorlarda görülen aşırı yağ tüketimi (yağ yakma) ve triger zinciri uzaması belirtileri, riskleri ve kalıcı tamir yöntemleri.',
+    content: 'VAG grubu araçlarda kullanılan TSI (Turbocharged Stratified Injection) ve TFSI motorlar, yüksek tork ve düşük yakıt tüketimi sunar. Ancak, özellikle 1.4 TSI, 1.8 TSI ve 2.0 TFSI motorların bazı nesillerinde yağ yakma (yağ eksiltme) ve triger zinciri uzaması gibi kronik sorunlar görülebilmektedir. Motorun sabah ilk çalışmada zincir sesi yapması (şakırdama) veya egzozdan mavi duman atması bu sorunların habercisidir.\n\nBu tip kronik motor arızalarında, vos74 bartın bölgesinde VAG grubu sahipleri için en güvenilir çözüm ortağıdır. Atölyemizde usta olarak kadir gül tarafından yönetilen ağır mekanik bölümümüzde, triger zinciri değişimi sente aparatları eşliğinde hassasiyetle yapılır. Piston segman değişimi ve silindir kapak revizyonu gibi büyük motor operasyonları da orijinal parçalarla garantili olarak tamamlanır.\n\nDoğru vizkozitede ve VAG onaylı motor yağı kullanımı bu motorların sağlığı için kritiktir. Bakım randevunuzu hızlıca oluşturmak için vos74.com.tr adresini kullanabilirsiniz. Ayrıca vos74 seo odaklı teknik makalelerimizi takip ederek motorunuzun ömrünü nasıl uzatabileceğiniz hakkında bilgi alabilirsiniz.',
+    image: '/before_engine.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Motor'
+  },
+  {
+    id: 'blog-5',
+    title: '1.6 TDI ve 2.0 TDI Motorlarda DPF ve EGR Tıkanması: Belirtiler ve Çözümler',
+    summary: 'VAG grubu dizel araçlarda sıkça karşılaşılan dizel partikül filtresi (DPF) doluluğu ve EGR valfi arızalarının temizliği, iptal edilmeden çözümleri.',
+    content: 'Volkswagen, Audi, Seat ve Skoda\'nın dizel motorları (TDI), yakıt verimliliğiyle bilinir. Ancak şehir içi kısa mesafe kullanımlarda Dizel Partikül Filtresi (DPF) ve Egzoz Gazı Geri Döndürme (EGR) sistemleri hızla kurumla dolup tıkanabilir. Gösterge panelinde kızdırma bujisi ışığının yanıp sönmesi, motor arıza lambası ve aracın çekişten düşerek "limp mode" (koruma modu) durumuna geçmesi en yaygın belirtilerdir.\n\nBartın ve çevre illerde dizel VAG grubu araç sahiplerinin bu sorunlardaki ilk adresi olan vos74 bartın servisimiz, çevre dostu ve yasal çözümleri ön planda tutar. Atölyemizde usta olarak kadir gül, DPF ve EGR sistemlerini sökmeden profesyonel makineler ve özel kimyasallar yardımıyla temizlemekte, ardından ODIS arıza tespit cihazımızla gerekli adaptasyon ve rejenerasyon işlemlerini tamamlamaktadır.\n\nDPF doluluğunu önlemek için aracınızı belirli aralıklarla yüksek devirde kullanmanız faydalı olacaktır. Randevu almak veya DPF temizlik fiyatlarını öğrenmek için vos74.com.tr sitemizi ziyaret edebilir. Hazırladığımız vos74 seo uyumlu bu rehberler, dizel aracınızı sorunsuz kullanmanıza yardımcı olacaktır.',
+    image: '/after_engine.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Mekanik'
+  },
+  {
+    id: 'blog-6',
+    title: 'VAG Grubu Araçlarda Elektronik Beyin (ECU) Arızaları ve ODIS Kodlama Çözümleri',
+    summary: 'Volkswagen, Audi, Seat ve Skoda araçlarında elektronik modül hataları, gösterge paneli arıza lambaları ve online ODIS kodlama ile beyin tamiri işlemleri.',
+    content: 'Yeni nesil VAG grubu araçlar, gelişmiş sürüş destek sistemleri ve konfor bileşenleri nedeniyle yoğun bir elektronik altyapıya sahiptir. ABS/ESP beyin arızaları, BCM (gövde kontrol modülü) sorunları, gösterge panelindeki iletişim kopuklukları veya bileşen koruma (component protection) engelleri, bu araçlarda uzmanlık gerektiren elektronik sorunlardır.\n\nBu karmaşık arızaların tespitinde vos74 bartın özel servisimiz, yetkili servis standartlarında hizmet vermektedir. Atölyemizde usta olarak kadir gül liderliğindeki dijital elektronik bölümümüz, orijinal online ODIS arıza tespit cihazı yardımıyla beyin programlama, yazılım güncelleme ve elektronik modül adaptasyonlarını başarıyla gerçekleştirmektedir.\n\nAyrıca aracınızın desteklediği gizli özelliklerin aktivasyonu (kadran selamlama, Amerikan park, korna ile kilitleme onayı vb.) gibi işlemler de güvenle yapılmaktadır. Tüm elektronik hizmet yelpazemize vos74.com.tr adresinden ulaşabilirsiniz. Sitemizdeki vos74 seo odaklı bilgilendirmelerle VAG grubu araç elektroniğine dair en doğru bilgilere ulaşabilirsiniz.',
+    image: '/obd_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Elektronik'
+  },
+  {
+    id: 'blog-7',
+    title: 'VAG Grubu Araçlarda Antifriz Kaçağı ve Isınmama (Kalorifer Radyatörü) Problemi',
+    summary: 'Devridaim (su pompası) kaçakları, G13 antifrizin çamurlaşması ve kalorifer peteğinin tıkanması sonucu aracın içini ısıtmaması sorunlarının tespiti ve çözümü.',
+    content: 'VAG grubu araçlarda kış aylarında sıkça karşılaşılan sorunlardan biri kaloriferin sadece soğuk veya ılık üflemesidir. Bu durum çoğunlukla kalorifer radyatörünün (peteğinin) tıkanmasından kaynaklanır. Özellikle fabrikasyon olarak doldurulan G13 antifrizin zamanla özelliğini yitirerek çamurlaşması veya sistemde kullanılan silika jel torbasının patlaması peteği tıkar. Ayrıca su pompası (devridaim) kaçakları da motorun susuz kalıp hararet yapmasına yol açabilir.\n\nIsınma ve soğutma sistemi sorunlarında Bartın Yeni Sanayi Sitesi\'nde faaliyet gösteren vos74 bartın, son teknoloji petek temizleme cihazlarıyla hizmetinizdedir. Servisimizde usta olarak kadir gül, kalorifer peteğinizi göğsü sökmeden özel kimyasal yıkama cihazıyla temizlemekte veya gerektiğinde orijinal yedek parçalarla değişimini sağlamaktadır. Ayrıca devridaim pompası kaçakları da hızlıca giderilmektedir.\n\nSoğutma sisteminde sadece VAG standartlarına uygun (G12 EVO veya G12++) antifriz ve saf su kullanılmalıdır. Soğutma sistemi kontrolü için vos74.com.tr üzerinden randevu alabilirsiniz. Bu vos74 seo odaklı içerik, kış aylarında güvenle seyahat etmeniz için hazırlanmıştır.',
+    image: '/hero_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Soğutma'
   }
 ];
 
