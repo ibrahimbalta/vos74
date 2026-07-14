@@ -317,6 +317,56 @@ const initialBlogs = [
     date: '14.07.2026',
     author: 'Kadir Gül Usta',
     category: 'Soğutma'
+  },
+  {
+    id: 'blog-8',
+    title: 'VAG Grubu Araçlarda AdBlue Arızaları ve Çözüm Yolları',
+    summary: 'Volkswagen, Audi ve Skoda TDI motorlu araçlarda sık rastlanan AdBlue pompa arızaları, enjektör tıkanmaları ve motor çalışmasını engelleyen geri sayım hatalarının çözümleri.',
+    content: 'VAG grubunun (Volkswagen, Audi, Skoda) Euro 6 normlarına sahip dizel (TDI) motorlu araçlarında, zararlı egzoz gazlarını azaltmak amacıyla AdBlue (SCR) sistemi kullanılmaktadır. Ancak bu sistem, özellikle soğuk havalarda AdBlue sıvısının kristalleşmesi, enjektörün tıkanması veya AdBlue ısıtıcısı ve pompasının arızalanması gibi sebeplerle sık sık hata verebilmektedir. Gösterge panelinde beliren ve motorun belirli bir kilometre sonra çalıştırılamayacağını bildiren "AdBlue geri sayım hatası" sürücülerin en çok korktuğu sorunlardan biridir.\n\nBartın ve çevre illerde dizel VAG grubu araçlarda karşılaşılan AdBlue arızalarında, vos74 bartın özel servisimiz yetkili servis kalitesinde çözümler sunmaktadır. Atölyemizde usta olarak kadir gül, AdBlue deposu, pompa modülü ve enjektör kontrollerini titizlikle yapmakta, tıkanan enjektörlerin temizliğini ve arızalı pompaların revizyonunu gerçekleştirmektedir. Tüm bu işlemler orijinal yedek parçalarla ve ODIS arıza tespit sistemimiz yardımıyla güvenle tamamlanmaktadır.\n\nSistemin sağlıklı çalışabilmesi için kaliteli ve standartlara uygun AdBlue sıvısı kullanılması kritik önem taşır. Detaylı bilgi edinmek ve AdBlue arıza tespit randevusu oluşturmak için vos74.com.tr adresini ziyaret edebilirsiniz. Hazırladığımız vos74 seo uyumlu rehberlerimizle VAG grubu araç sahiplerine en doğru teknik çözümleri sunmaya devam ediyoruz.',
+    image: '/obd_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Motor'
+  },
+  {
+    id: 'blog-9',
+    title: 'VAG Grubu Araçlarda Su Alma Sorunları ve Sunroof Tahliye Tıkanıklıkları',
+    summary: 'Golf, Leon, Octavia ve Passat modellerinde sık karşılaşılan ıslak taban halısı şikayetleri, sunroof su tahliye hortumu tıkanıklığı ve kapı içi sızıntı çözümleri.',
+    content: 'VAG grubu araç sahiplerinin (özellikle Golf 7, Seat Leon, Skoda Octavia ve Passat modellerinde) yağmurlu günlerin ardından en çok karşılaştığı sorunlardan biri aracın içine su almasıdır. Bu durum genellikle sunroof su tahliye kanallarının çamur, toz veya yapraklarla tıkanması sonucu suyun tavan döşemesinden veya ön direklerden sızarak taban halısını ıslatmasıyla başlar. Diğer bir yaygın sebep ise kapı içlerindeki hoparlör contalarının zamanla yıpranarak kapı iç döşemesinden içeri su sızdırmasıdır. Taban halısının ıslanması, araç içinde kötü kokuya ve elektronik bileşenlerin oksitlenmesine yol açabilir.\n\nAraç içi su alma ve sızıntı tespitlerinde, vos74 bartın servisimiz uzman kadrosuyla kesin çözümler üretmektedir. Atölyemizde usta olarak kadir gül ve ekibimiz, sunroof tahliye kanallarını özel temizleme aparatlarıyla açmakta, kapı paneli ve hoparlör contalarını VAG standartlarında izole etmektedir. Islanan taban halısının sökülerek kurutulması ve alt kısımdaki kablo tesisatlarının oksitlenmeye karşı temizlenmesi işlemleri de titizlikle yürütülmektedir.\n\nAracınızın tavan ve kapı kanallarının her yıl düzenli temizlenmesi bu sorunları önlemenin en kolay yoludur. Su tahliyesi bakımı ve sızıntı onarımları için vos74.com.tr sitemiz üzerinden hemen randevu alabilirsiniz. Bu vos74 seo odaklı bilgilendirme, aracınızın kabin konforunu korumanıza yardımcı olmak amacıyla hazırlanmıştır.',
+    image: '/hero_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Mekanik'
+  },
+  {
+    id: 'blog-10',
+    title: 'VAG Grubu Haldex 4x4 (4Motion/Quattro) Sistem Sorunları ve Bakımı',
+    summary: 'Tiguan, Golf R, Passat 4Motion and Audi Quattro modellerindeki Haldex diferansiyel sisteminin çalışma prensipleri, pompa filtre arızaları ve periyodik yağ değişimi.',
+    content: 'Volkswagen grubunun 4Motion, Audi\'nin ise Quattro adıyla sunduğu akıllı dört tekerlekten çekiş sistemlerinin kalbinde Haldex kavrama ünitesi yer alır. Bu sistem, ön tekerleklerin patinaja düştüğü anlarda torku milisaniyeler içinde arka tekerleklere aktarır. Ancak Haldex sistemlerinde en sık karşılaşılan arıza, Haldex pompasının süzgecinin (filtresinin) aşınan kavrama balatalarının çamuruyla tıkanmasıdır. Tıkanma sonucunda pompa yanabilir ve araç sadece önden çekişli hale gelir. Göstergede herhangi bir hata lambası yanmasa bile, ani kalkışlarda ön tekerleklerin sarması Haldex arızasının en büyük belirtisidir.\n\nBartın ve Karadeniz bölgesinde Haldex 4x4 sistemlerinin bakımı ve onarımında, vos74 bartın özel servisimiz öncü konumdadır. Servisimizde usta olarak kadir gül, Haldex yağ değişimi sırasında pompayı sökerek filtresini temizlemekte, arızalı Haldex pompalarının elektrik motoru ve kart revizyonunu profesyonelce gerçekleştirmektedir. Sistemde kullanılan Haldex yağının orijinal VAG onaylı olması sistemin ömrü açısından hayati önem taşır.\n\nHer 60.000 km\'de bir yapılması gereken Haldex bakımı, sistemi yüksek maliyetli diferansiyel arızalarından korur. Haldex yağı değişimi ve sistem testi için vos74.com.tr üzerinden randevu kaydı oluşturabilirsiniz. Bu teknik makale, vos74 seo çalışmaları kapsamında VAG 4x4 kullanıcılarını bilgilendirmek için yazılmıştır.',
+    image: '/workshop_panorama.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Yürüyen Aksam'
+  },
+  {
+    id: 'blog-11',
+    title: 'VAG Grubu Araçlarda Direksiyon Kilidi (ELV) Arızası ve Çalışmama Sorunu',
+    summary: 'Passat B6, B7, CC ve Audi A4 modellerinde görülen ELV direksiyon kilidi modülü arızaları, anahtar algılamama ve aracı çalıştıramama sorunlarının tamiri.',
+    content: 'VAG grubu araçlarda (özellikle Passat B6, B7, CC ve eski nesil Audi modellerinde) sık rastlanan kronik sorunlardan biri de elektronik direksiyon kilidi (ELV) arızasıdır. Sürücü anahtarı yuvaya taktığında direksiyon kilidinin açılmaması, gösterge panelinde sarı veya kırmızı direksiyon sembolünün yanması ve "Steering Column Lock Defective" uyarısı bu arızanın temel göstergeleridir. Kırmızı uyarı yandığında araç güvenlik nedeniyle marş basmaz ve çalıştırılamaz.\n\nELV direksiyon kilidi arızalarının giderilmesinde, vos74 bartın özel servisimiz online programlama ve lisanslı donanımları ile kesin çözümler üretmektedir. Atölyemizde usta olarak kadir gül liderliğindeki oto elektronik ekibimiz, arızalı ELV modülünün içindeki mikro motor ve switch\'leri yenilemekte veya müşterinin tercihine göre sisteme lisanslı ELV emülatör kodlaması yapmaktadır. Bu sayede direksiyon kilidi kronik sorunu ömür boyu kalıcı olarak çözülmektedir.\n\nELV arızaları aniden yolda kalmanıza neden olabileceği için ilk sarı uyarıyı aldığınızda servise başvurmanız önemlidir. Detaylı bilgi ve tamir fiyatları için vos74.com.tr sitemizden destek alabilirsiniz. Hazırladığımız vos74 seo uyumlu bu makale, elektronik arızalarla karşılaştığınızda izlemeniz gereken yolları özetlemektedir.',
+    image: '/obd_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Elektronik'
+  },
+  {
+    id: 'blog-12',
+    title: 'VAG Grubu Start-Stop Sistemi Arızaları ve Akü Seçimi',
+    summary: 'Start-Stop sisteminin devreye girmeme nedenleri, AGM ve EFB akülerin özellikleri ve yeni akü takıldıktan sonra yapılması gereken kodlama işlemleri.',
+    content: 'Yeni nesil VAG grubu araçlarda yakıt tüketimini ve emisyon değerlerini düşürmek amacıyla Start-Stop teknolojisi standart olarak sunulmaktadır. Ancak birçok araç sahibi, Start-Stop sisteminin çalışmadığından veya ekranda "Start-Stop Error" uyarısı verdiğinden şikayetçidir. Bu sistemin çalışmaması genellikle akü voltajının düşmesi, motor sıcaklığının uygun olmaması veya klima yükünün fazla olmasından kaynaklanır. Start-Stop özellikli VAG araçlarda standart sulu akü yerine kesinlikle AGM veya EFB tipi yüksek döngüye dayanıklı akülerin kullanılması gerekmektedir.\n\nStart-Stop sistemi arızaları ve akü değişimlerinde, vos74 bartın özel servisimiz orijinal standartlarda hizmet vermektedir. Atölyemizde usta olarak kadir gül, yeni AGM veya EFB akülerin montajını yaptıktan sonra ODIS veya VAG-COM cihazları ile akünün kapasite ve seri numarası bilgilerini motor kontrol ünitesine (ECU) kodlamaktadır. Akü kodlama işlemi yapılmadığında, şarj dinamosu yeni aküyü eski zayıf akü gibi şarj etmeye devam eder ve akünün ömrü kısa sürede biter.\n\nStart-Stop sisteminizin sağlığını korumak ve doğru akü montajı yaptırmak için vos74.com.tr üzerinden servis randevusu alabilirsiniz. Bu yazı, vos74 seo stratejileri doğrultusunda VAG grubu araç sahiplerinin akü seçimi ve kodlama konusundaki farkındalığını artırmak amacıyla yayınlanmıştır.',
+    image: '/hero_bg.png',
+    date: '14.07.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Elektronik'
   }
 ];
 
