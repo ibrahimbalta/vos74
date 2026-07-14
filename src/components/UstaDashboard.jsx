@@ -19,6 +19,7 @@ export default function UstaDashboard({
   addRepairJob, 
   deleteRepairJob,
   updateRepairJobCost,
+  updateRepairLaborCost,
   addPendingRequest, 
   addActiveRepair,
   updateRepairBayAndUsta,
@@ -113,6 +114,7 @@ export default function UstaDashboard({
       baseCost: costVal,
       jobsDone: newRepairService ? [{ name: newRepairService, cost: costVal }] : [],
       extraItems: [],
+      laborCost: 0,
       pendingApproval: null,
       deliveryTime: 'İnceleme Sonrası Belirlenecek',
       bayId: newRepairBay,
@@ -891,7 +893,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                     </div>
                   </div>
                   <div className="price-tag-big text-gradient">
-                    {(car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) + (car.extraItems ? car.extraItems.reduce((a, b) => a + b.cost, 0) : 0)} TL
+                    {(car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) + (car.extraItems ? car.extraItems.reduce((a, b) => a + b.cost, 0) : 0) + (car.laborCost || 0)} TL
                   </div>
                 </div>
 
@@ -993,6 +995,19 @@ _Vos74 VAG Grubu Özel Servis_`;
                     <button onClick={() => handleAddJob(car.id)} className="glow-btn square-btn">
                       <Plus size={16} />
                     </button>
+                  </div>
+
+                  <div className="labor-cost-input-row" style={{ marginTop: '15px', borderTop: '1px dashed var(--border-color)', paddingTop: '12px' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Toptan İşçilik Ücreti (TL)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        placeholder="İşçilik Ücreti (TL)..."
+                        value={car.laborCost || ''}
+                        onChange={(e) => updateRepairLaborCost && updateRepairLaborCost(car.id, e.target.value)}
+                        style={{ flexGrow: 1, height: '36px', padding: '0 10px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -2266,218 +2281,262 @@ _Vos74 VAG Grubu Özel Servis_`;
             </div>
 
             {/* Printable Invoice Body */}
-            <div className="invoice-container print-paper-invoice" style={{ fontFamily: 'Arial, sans-serif', color: '#000', background: '#fff', padding: '0', boxSizing: 'border-box' }}>
-              
-              {/* Top Double-Column Header Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width: '55%', border: '1px solid #000', padding: '8px', verticalAlign: 'top' }}>
-                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>VOLKSWAGEN ÖZEL SERVİS</h3>
-                      <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000' }}><strong>{printingCar.assignedUsta || 'Kadir GÜL'}:</strong> 0532 637 39 78</p>
-                      <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000', lineHeight: '1.3' }}><strong>ADRES:</strong> Gölbucağı Mah. Yeni Sanayi Sitesi Cami Sok. 13 / BARTIN</p>
-                    </td>
-                    <td style={{ width: '45%', border: '1px solid #000', padding: '8px', verticalAlign: 'top', position: 'relative' }}>
-                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', color: '#000', textTransform: 'uppercase' }}>ARAÇ KABUL FORMU</h3>
+            {/* Printable Invoice Body */}
+            {(() => {
+              const isLabor = (name) => {
+                const lower = (name || '').toLowerCase();
+                return lower.includes('işçilik') || lower.includes('işcilik') || lower.includes('iscilik') || lower.includes('labor') || lower.includes('ustalık') || lower.includes('ücreti') || lower.includes('sökme') || lower.includes('takma');
+              };
+              const filteredDemands = (printingCar.jobsDone || []).filter(job => {
+                const name = typeof job === 'object' ? job.name : job;
+                return !isLabor(name);
+              });
+              const partsTotal = 
+                (printingCar.jobsDone ? printingCar.jobsDone.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
+                (printingCar.extraItems ? printingCar.extraItems.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0);
+              const laborTotal = 
+                (printingCar.laborCost || 0) +
+                (printingCar.jobsDone ? printingCar.jobsDone.filter(j => isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
+                (printingCar.extraItems ? printingCar.extraItems.filter(j => isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0);
+              const grandTotal = partsTotal + laborTotal;
+              const hasLaborRow = (printingCar.laborCost || 0) > 0;
+              const jobsLength = (printingCar.jobsDone || []).length;
+              const extraLength = (printingCar.extraItems || []).length;
+              const laborRowCount = hasLaborRow ? 1 : 0;
+              const totalRowsCount = jobsLength + extraLength + laborRowCount;
+
+              return (
+                <div className="invoice-container print-paper-invoice" style={{ fontFamily: 'Arial, sans-serif', color: '#000', background: '#fff', padding: '0', boxSizing: 'border-box' }}>
+                  
+                  {/* Top Double-Column Header Table */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: '55%', border: '1px solid #000', padding: '8px', verticalAlign: 'top' }}>
+                          <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>VOLKSWAGEN ÖZEL SERVİS</h3>
+                          <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000' }}><strong>{printingCar.assignedUsta || 'Kadir GÜL'}:</strong> 0532 637 39 78</p>
+                          <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#000', lineHeight: '1.3' }}><strong>ADRES:</strong> Gölbucağı Mah. Yeni Sanayi Sitesi Cami Sok. 13 / BARTIN</p>
+                        </td>
+                        <td style={{ width: '45%', border: '1px solid #000', padding: '8px', verticalAlign: 'top', position: 'relative' }}>
+                          <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', color: '#000', textTransform: 'uppercase' }}>ARAÇ KABUL FORMU</h3>
+                          
+                          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '4px' }}>
+                            <tbody>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', width: '50%', color: '#000' }}>İş Emri Sıra No</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 'bold', color: '#000' }}>DS-{printingCar.id}</td>
+                              </tr>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Kabul Tarihi</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{new Date().toLocaleDateString('tr-TR')}</td>
+                              </tr>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Teslim Tarihi</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{printingCar.deliveryTime && printingCar.deliveryTime.includes(':') ? new Date().toLocaleDateString('tr-TR') : (printingCar.deliveryTime || new Date().toLocaleDateString('tr-TR'))}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
+                            <img src="/logo.png" alt="Vos74" style={{ maxHeight: '40px', width: 'auto', objectFit: 'contain' }} />
+                            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ef4444', margin: '2px 0 0 0', letterSpacing: '0.5px' }}>VOLKSWAGEN ÖZEL SERVİS</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Araç Bilgileri Grid Table */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan="4" style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>ARAÇ BİLGİLERİ</td>
+                      </tr>
+                      <tr>
+                        <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Araç Plakası</td>
+                        <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontWeight: 'bold', color: '#000' }}>{printingCar.plate}</td>
+                        <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Müşteri Adı</td>
+                        <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.owner}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Kilometre</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.km || '105.437'}</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Telefon</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.phone}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Marka / Model</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.model}</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Aracı Getiren</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.broughtBy || printingCar.owner}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Şase No</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.chassis || 'WUW222612244008293'}</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Getiren Tel / İmza</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', height: '24px', verticalAlign: 'middle', color: '#000' }}>{printingCar.phone} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
+                      </tr>
+                      <tr>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Motor No</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.motorNo || 'CJZC12926'}</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Servis Danışmanı / İmza</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.advisor || 'İbrahim BALTA'} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Müşteri Talepleri Table */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>MÜŞTERİ TALEPLERİ</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0', border: '1px solid #000' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <tbody>
+                              {filteredDemands.map((job, idx) => (
+                                <tr key={`demand-${idx}`}>
+                                  <td style={{ borderBottom: '1px solid #000', borderRight: '1px solid #000', width: '30px', textAlign: 'center', padding: '5px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{idx + 1}</td>
+                                  <td style={{ borderBottom: '1px solid #000', padding: '5px 10px', fontSize: '0.8rem', color: '#000' }}>{typeof job === 'object' ? job.name : job}</td>
+                                </tr>
+                              ))}
+                              {filteredDemands.length === 0 && (
+                                <tr>
+                                  <td style={{ padding: '8px', fontSize: '0.8rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>Müşteri talebi bulunmamaktadır.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Fitted Parts & Labor Table */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none', marginTop: '15px' }}>
+                    <thead>
+                      <tr style={{ background: '#e5e7eb' }}>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '6%', textAlign: 'center', color: '#000' }}>S.NO</th>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '44%', textAlign: 'left', color: '#000' }}>TAKILAN PARÇA / YAPILAN İŞÇİLİK</th>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '12%', textAlign: 'right', color: '#000' }}>BİRİM FİYAT</th>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '8%', textAlign: 'center', color: '#000' }}>ADET</th>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '14%', textAlign: 'right', color: '#000' }}>İŞÇİLİK</th>
+                        <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '16%', textAlign: 'right', color: '#000' }}>PARÇA TOPLAM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => {
+                        const jobName = typeof job === 'object' ? job.name : job;
+                        const jobCost = typeof job === 'object' ? job.cost : 0;
+                        const jobIsLabor = isLabor(jobName);
+                        return (
+                          <tr key={`part-${idx}`}>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{idx + 1}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>{jobName}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{jobIsLabor ? '-' : `${jobCost} TL`}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{jobIsLabor ? `${jobCost} TL` : '-'}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{jobIsLabor ? '-' : `${jobCost} TL`}</td>
+                          </tr>
+                        );
+                      })}
                       
-                      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '4px' }}>
-                        <tbody>
-                          <tr>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', width: '50%', color: '#000' }}>İş Emri Sıra No</td>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 'bold', color: '#000' }}>DS-{printingCar.id}</td>
+                      {printingCar.extraItems && printingCar.extraItems.map((item, idx) => {
+                        const globalIdx = (printingCar.jobsDone?.length || 0) + idx + 1;
+                        const itemIsLabor = isLabor(item.name);
+                        return (
+                          <tr key={`extra-${idx}`} style={{ fontStyle: 'italic' }}>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{globalIdx}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>➕ {item.name}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{itemIsLabor ? '-' : `${item.cost} TL`}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{itemIsLabor ? `${item.cost} TL` : '-'}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{itemIsLabor ? '-' : `${item.cost} TL`}</td>
                           </tr>
-                          <tr>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Kabul Tarihi</td>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{new Date().toLocaleDateString('tr-TR')}</td>
-                          </tr>
-                          <tr>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>Teslim Tarihi</td>
-                            <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '0.7rem', color: '#000' }}>{printingCar.deliveryTime && printingCar.deliveryTime.includes(':') ? new Date().toLocaleDateString('tr-TR') : (printingCar.deliveryTime || new Date().toLocaleDateString('tr-TR'))}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                        );
+                      })}
+                      
+                      {/* Toptan İşçilik Row if exists */}
+                      {hasLaborRow && (
+                        <tr style={{ fontWeight: 'bold', background: 'rgba(6, 182, 212, 0.02)' }}>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>
+                            {jobsLength + extraLength + 1}
+                          </td>
+                          <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>
+                            🛠️ Toptan İşçilik Ücreti
+                          </td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>
+                            {printingCar.laborCost} TL
+                          </td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
+                        </tr>
+                      )}
 
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
-                        <img src="/logo.png" alt="Vos74" style={{ maxHeight: '40px', width: 'auto', objectFit: 'contain' }} />
-                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ef4444', margin: '2px 0 0 0', letterSpacing: '0.5px' }}>VOLKSWAGEN ÖZEL SERVİS</span>
+                      {/* Padding empty rows to fit the receipt paper design */}
+                      {Array.from({ length: Math.max(0, 10 - totalRowsCount) }).map((_, idx) => {
+                        const globalIdx = totalRowsCount + idx + 1;
+                        return (
+                          <tr key={`empty-${idx}`} style={{ height: '22px' }}>
+                            <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#999' }}>{globalIdx}</td>
+                            <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                            <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                            <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                            <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                            <td style={{ border: '1px solid #000', padding: '4px' }}></td>
+                          </tr>
+                        );
+                      })}
+
+                      {/* Calculations footer */}
+                      <tr>
+                        <td colSpan="4" style={{ border: '1px solid #000', borderBottom: 'none', borderLeft: 'none', background: 'transparent' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Parça Toplamı</td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                          {partsTotal} TL
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>İşçilik Toplamı</td>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                          {laborTotal} TL
+                        </td>
+                      </tr>
+                      <tr style={{ background: '#e5e7eb' }}>
+                        <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>Genel Toplam</td>
+                        <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
+                          {grandTotal} TL
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Accept footer and signature lines */}
+                  <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#000', margin: '0 0 10px 0' }}>ARACIMA TAKILAN PARÇA VE İŞÇİLİKLERİ TARAFIMCA KABUL EDERİM</p>
+                    {includeWarrantyNote && (
+                      <p style={{ fontSize: '0.7rem', fontStyle: 'italic', color: '#ef4444', margin: '-5px 0 10px 0', fontWeight: 'bold' }}>* Takılan yedek parçalar ve işçilikler 1 yıl boyunca servisimiz garantisi altındadır.</p>
+                    )}
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 50px', marginTop: '25px' }}>
+                      <div style={{ textAlign: 'center', width: '130px' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM ALAN</span>
+                        <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {/* Araç Bilgileri Grid Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
-                <tbody>
-                  <tr>
-                    <td colSpan="4" style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>ARAÇ BİLGİLERİ</td>
-                  </tr>
-                  <tr>
-                    <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Araç Plakası</td>
-                    <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontWeight: 'bold', color: '#000' }}>{printingCar.plate}</td>
-                    <td style={{ width: '18%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Müşteri Adı</td>
-                    <td style={{ width: '32%', border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.owner}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Kilometre</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.km || '105.437'}</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Telefon</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.phone}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Marka / Model</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.model}</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Aracı Getiren</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.broughtBy || printingCar.owner}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Şase No</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.chassis || 'WUW222612244008293'}</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Getiren Tel / İmza</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', height: '24px', verticalAlign: 'middle', color: '#000' }}>{printingCar.phone} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
-                  </tr>
-                  <tr>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Motor No</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#000' }}>{printingCar.motorNo || 'CJZC12926'}</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Servis Danışmanı / İmza</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.8rem', color: '#000' }}>{printingCar.advisor || 'İbrahim BALTA'} / <span style={{ borderBottom: '1px dashed #000', display: 'inline-block', width: '70px', height: '8px' }}></span></td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {/* Müşteri Talepleri Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ background: '#e5e7eb', border: '1px solid #000', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem', padding: '4px', color: '#000' }}>MÜŞTERİ TALEPLERİ</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '0', border: '1px solid #000' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <tbody>
-                          {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => (
-                            <tr key={`demand-${idx}`}>
-                              <td style={{ borderBottom: '1px solid #000', borderRight: '1px solid #000', width: '30px', textAlign: 'center', padding: '5px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{idx + 1}</td>
-                              <td style={{ borderBottom: '1px solid #000', padding: '5px 10px', fontSize: '0.8rem', color: '#000' }}>{typeof job === 'object' ? job.name : job}</td>
-                            </tr>
-                          ))}
-                          {(!printingCar.jobsDone || printingCar.jobsDone.length === 0) && (
-                            <tr>
-                              <td style={{ padding: '8px', fontSize: '0.8rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>Müşteri talebi bulunmamaktadır.</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {/* Fitted Parts & Labor Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', borderTop: 'none', marginTop: '15px' }}>
-                <thead>
-                  <tr style={{ background: '#e5e7eb' }}>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '6%', textAlign: 'center', color: '#000' }}>S.NO</th>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '44%', textAlign: 'left', color: '#000' }}>TAKILAN PARÇA / YAPILAN İŞÇİLİK</th>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '12%', textAlign: 'right', color: '#000' }}>BİRİM FİYAT</th>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '8%', textAlign: 'center', color: '#000' }}>ADET</th>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '14%', textAlign: 'right', color: '#000' }}>İŞÇİLİK</th>
-                    <th style={{ border: '1px solid #000', padding: '5px', fontSize: '0.7rem', width: '16%', textAlign: 'right', color: '#000' }}>PARÇA TOPLAM</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {printingCar.jobsDone && printingCar.jobsDone.map((job, idx) => {
-                    const jobName = typeof job === 'object' ? job.name : job;
-                    const jobCost = typeof job === 'object' ? job.cost : 0;
-                    return (
-                      <tr key={`part-${idx}`}>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>{jobName}</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{jobCost} TL</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{jobCost} TL</td>
-                      </tr>
-                    );
-                  })}
-                  
-                  {printingCar.extraItems && printingCar.extraItems.map((item, idx) => {
-                    const globalIdx = (printingCar.jobsDone?.length || 0) + idx + 1;
-                    return (
-                      <tr key={`extra-${idx}`} style={{ fontStyle: 'italic' }}>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>{globalIdx}</td>
-                        <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', color: '#000' }}>➕ {item.name}</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>{item.cost} TL</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#000' }}>1</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', color: '#000' }}>-</td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{item.cost} TL</td>
-                      </tr>
-                    );
-                  })}
-                  
-                  {/* Padding empty rows to fit the receipt paper design */}
-                  {Array.from({ length: Math.max(0, 10 - ((printingCar.jobsDone?.length || 0) + (printingCar.extraItems?.length || 0))) }).map((_, idx) => {
-                    const globalIdx = (printingCar.jobsDone?.length || 0) + (printingCar.extraItems?.length || 0) + idx + 1;
-                    return (
-                      <tr key={`empty-${idx}`} style={{ height: '22px' }}>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '0.75rem', color: '#999' }}>{globalIdx}</td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}></td>
-                      </tr>
-                    );
-                  })}
-
-                  {/* Calculations footer */}
-                  <tr>
-                    <td colSpan="4" style={{ border: '1px solid #000', borderBottom: 'none', borderLeft: 'none', background: 'transparent' }}></td>
-                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>Parça Toplamı</td>
-                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
-                      {Math.round(((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                                  (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.833)} TL
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
-                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', background: '#f9fafb', color: '#000' }}>İşçilik Toplamı</td>
-                    <td style={{ border: '1px solid #000', padding: '4px 8px', fontSize: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
-                      {Math.round(((printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                                  (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)) * 0.167)} TL
-                    </td>
-                  </tr>
-                  <tr style={{ background: '#e5e7eb' }}>
-                    <td colSpan="4" style={{ border: 'none', background: 'transparent' }}></td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>Genel Toplam</td>
-                    <td style={{ border: '1px solid #000', padding: '5px 8px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 'bold', color: '#000' }}>
-                      {(printingCar.jobsDone ? printingCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
-                       (printingCar.extraItems ? printingCar.extraItems.reduce((a, b) => a + b.cost, 0) : 0)} TL
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {/* Accept footer and signature lines */}
-              <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#000', margin: '0 0 10px 0' }}>ARACIMA TAKILAN PARÇA VE İŞÇİLİKLERİ TARAFIMCA KABUL EDERİM</p>
-                {includeWarrantyNote && (
-                  <p style={{ fontSize: '0.7rem', fontStyle: 'italic', color: '#ef4444', margin: '-5px 0 10px 0', fontWeight: 'bold' }}>* Takılan yedek parçalar ve işçilikler 1 yıl boyunca servisimiz garantisi altındadır.</p>
-                )}
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 50px', marginTop: '25px' }}>
-                  <div style={{ textAlign: 'center', width: '130px' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM ALAN</span>
-                    <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
+                      <div style={{ textAlign: 'center', width: '130px' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM EDEN</span>
+                        <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ textAlignment: 'center', width: '130px' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#000', display: 'block', marginBottom: '25px' }}>TESLİM EDEN</span>
-                    <span style={{ borderTop: '1px solid #000', display: 'block', width: '100%', fontSize: '0.7rem', paddingTop: '3px', color: '#444' }}>İmza</span>
-                  </div>
+
                 </div>
-              </div>
-
-            </div>
+              );
+            })()}
           </div>
         </div>
       )}

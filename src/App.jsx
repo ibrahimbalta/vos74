@@ -713,6 +713,7 @@ function App() {
       baseCost: 2000,
       jobsDone: [{ name: `Kabul formu dolduruldu: ${targetApt.service}`, cost: 2000 }],
       extraItems: [],
+      laborCost: 0,
       pendingApproval: null,
       deliveryTime: 'İnceleme Sonrası Belirlenecek',
       bayId: 'lift1',
@@ -838,6 +839,24 @@ function App() {
     }
   };
 
+  const updateRepairLaborCost = async (id, newLaborCost) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        laborCost: Number(newLaborCost) || 0 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const addPendingRequest = async (id, itemName, cost) => {
     const updated = activeRepairs.map(car => 
       String(car.id) === String(id) ? { ...car, pendingApproval: { item: itemName, cost: cost } } : car
@@ -881,13 +900,17 @@ function App() {
 
     const jobsTotal = targetCar.jobsDone ? targetCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
     const extraTotal = targetCar.extraItems ? targetCar.extraItems.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
-    const totalCost = jobsTotal + extraTotal;
+    const laborTotal = targetCar.laborCost || 0;
+    const totalCost = jobsTotal + extraTotal + laborTotal;
 
     const historyRecord = {
       plate: targetCar.plate,
       model: targetCar.model,
       date: new Date().toLocaleDateString('tr-TR'),
-      desc: targetCar.jobsDone.map(j => typeof j === 'object' ? j.name : j).join(', '),
+      desc: [
+        ...targetCar.jobsDone.map(j => typeof j === 'object' ? j.name : j),
+        ...(laborTotal > 0 ? [`Toptan İşçilik (${laborTotal} TL)`] : [])
+      ].join(', '),
       cost: totalCost,
       master: targetCar.assignedUsta || 'Nuri Usta'
     };
@@ -1101,6 +1124,7 @@ function App() {
               addRepairJob={addRepairJob}
               deleteRepairJob={deleteRepairJob}
               updateRepairJobCost={updateRepairJobCost}
+              updateRepairLaborCost={updateRepairLaborCost}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
               updateRepairBayAndUsta={updateRepairBayAndUsta}
