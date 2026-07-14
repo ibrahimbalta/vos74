@@ -148,6 +148,7 @@ export default function UstaDashboard({
   };
   const [newExtraItemName, setNewExtraItemName] = useState('');
   const [newExtraItemCost, setNewExtraItemCost] = useState('');
+  const [extraItemPhone, setExtraItemPhone] = useState('');
   const [activeExtraFormId, setActiveExtraFormId] = useState(null);
   
   // State for invoice print preview & job editing
@@ -308,9 +309,10 @@ Bizleri tercih ettiğiniz için teşekkür ederiz!`;
 
       // Send WhatsApp notification to the customer
       const car = activeRepairs.find(c => c.id === id);
-      if (car && car.phone) {
+      const recipientPhone = extraItemPhone || (car ? car.phone : '');
+      if (car && recipientPhone) {
         // Format phone number for WhatsApp (remove spaces, dashes, leading 0, add 90 prefix)
-        let phoneClean = car.phone.replace(/[\s\-\(\)]/g, '');
+        let phoneClean = recipientPhone.replace(/[\s\-\(\)]/g, '');
         if (phoneClean.startsWith('0')) phoneClean = '90' + phoneClean.substring(1);
         if (!phoneClean.startsWith('90') && !phoneClean.startsWith('+')) phoneClean = '90' + phoneClean;
         phoneClean = phoneClean.replace('+', '');
@@ -348,6 +350,7 @@ _Vos74 VAG Grubu Özel Servis_`;
 
       setNewExtraItemName('');
       setNewExtraItemCost('');
+      setExtraItemPhone('');
       setActiveExtraFormId(null);
     }
   };
@@ -1036,7 +1039,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                   ) : (
                     <div>
                       {activeExtraFormId === car.id ? (
-                        <div className="extra-approval-form glass">
+                        <div className="extra-approval-form glass" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <h6>Parça / Onarım Onayı Gönder</h6>
                           <div className="form-row-2">
                             <input 
@@ -1052,6 +1055,16 @@ _Vos74 VAG Grubu Özel Servis_`;
                               onChange={(e) => setNewExtraItemCost(e.target.value)}
                             />
                           </div>
+                          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Müşteri WhatsApp Numarası</label>
+                            <input 
+                              type="tel" 
+                              placeholder="WhatsApp No (Örn: 05321234567)" 
+                              value={extraItemPhone}
+                              onChange={(e) => setExtraItemPhone(e.target.value)}
+                              style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem' }}
+                            />
+                          </div>
                           <div className="form-actions">
                             <button 
                               className="approve-btn"
@@ -1061,7 +1074,10 @@ _Vos74 VAG Grubu Özel Servis_`;
                             </button>
                             <button 
                               className="cancel-btn"
-                              onClick={() => setActiveExtraFormId(null)}
+                              onClick={() => {
+                                setActiveExtraFormId(null);
+                                setExtraItemPhone('');
+                              }}
                             >
                               Vazgeç
                             </button>
@@ -1070,7 +1086,10 @@ _Vos74 VAG Grubu Özel Servis_`;
                       ) : (
                         <button 
                           className="glow-btn-secondary full-width"
-                          onClick={() => setActiveExtraFormId(car.id)}
+                          onClick={() => {
+                            setActiveExtraFormId(car.id);
+                            setExtraItemPhone(car.phone || '');
+                          }}
                         >
                           <PlusCircle size={14} />
                           <span>Ekstra Onarım/Parça Onayı İste</span>
