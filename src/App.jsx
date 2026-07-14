@@ -714,6 +714,7 @@ function App() {
       jobsDone: [{ name: `Kabul formu dolduruldu: ${targetApt.service}`, cost: 2000 }],
       extraItems: [],
       laborCost: 0,
+      customerDemands: targetApt.service || '',
       pendingApproval: null,
       deliveryTime: 'İnceleme Sonrası Belirlenecek',
       bayId: 'lift1',
@@ -844,6 +845,24 @@ function App() {
       String(car.id) === String(id) ? { 
         ...car, 
         laborCost: Number(newLaborCost) || 0 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const updateRepairCustomerDemands = async (id, demands) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        customerDemands: demands 
       } : car
     );
     setActiveRepairs(updated);
@@ -1125,6 +1144,7 @@ function App() {
               deleteRepairJob={deleteRepairJob}
               updateRepairJobCost={updateRepairJobCost}
               updateRepairLaborCost={updateRepairLaborCost}
+              updateRepairCustomerDemands={updateRepairCustomerDemands}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
               updateRepairBayAndUsta={updateRepairBayAndUsta}

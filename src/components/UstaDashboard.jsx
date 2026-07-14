@@ -20,6 +20,7 @@ export default function UstaDashboard({
   deleteRepairJob,
   updateRepairJobCost,
   updateRepairLaborCost,
+  updateRepairCustomerDemands,
   addPendingRequest, 
   addActiveRepair,
   updateRepairBayAndUsta,
@@ -115,6 +116,7 @@ export default function UstaDashboard({
       jobsDone: newRepairService ? [{ name: newRepairService, cost: costVal }] : [],
       extraItems: [],
       laborCost: 0,
+      customerDemands: newRepairService || '',
       pendingApproval: null,
       deliveryTime: 'İnceleme Sonrası Belirlenecek',
       bayId: newRepairBay,
@@ -913,6 +915,20 @@ _Vos74 VAG Grubu Özel Servis_`;
                       );
                     })}
                   </div>
+                </div>
+
+                <div className="manage-jobs-box glass" style={{ marginBottom: '16px' }}>
+                  <h6 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MessageSquare size={14} className="text-primary" />
+                    <span>Müşteri Talepleri / Şikayetleri</span>
+                  </h6>
+                  <textarea
+                    rows="3"
+                    placeholder="Örn:&#10;Sağ salıncak değişecek&#10;Şanzıman yağı kontrol edilecek"
+                    value={car.customerDemands || ''}
+                    onChange={(e) => updateRepairCustomerDemands && updateRepairCustomerDemands(car.id, e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
                 </div>
 
                 <div className="manage-jobs-box glass">
@@ -2281,16 +2297,15 @@ _Vos74 VAG Grubu Özel Servis_`;
             </div>
 
             {/* Printable Invoice Body */}
-            {/* Printable Invoice Body */}
             {(() => {
               const isLabor = (name) => {
                 const lower = (name || '').toLowerCase();
                 return lower.includes('işçilik') || lower.includes('işcilik') || lower.includes('iscilik') || lower.includes('labor') || lower.includes('ustalık') || lower.includes('ücreti') || lower.includes('sökme') || lower.includes('takma');
               };
-              const filteredDemands = (printingCar.jobsDone || []).filter(job => {
-                const name = typeof job === 'object' ? job.name : job;
-                return !isLabor(name);
-              });
+              const demandsList = (printingCar.customerDemands || '')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
               const partsTotal = 
                 (printingCar.jobsDone ? printingCar.jobsDone.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
                 (printingCar.extraItems ? printingCar.extraItems.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0);
@@ -2395,13 +2410,13 @@ _Vos74 VAG Grubu Özel Servis_`;
                         <td style={{ padding: '0', border: '1px solid #000' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <tbody>
-                              {filteredDemands.map((job, idx) => (
+                              {demandsList.map((demand, idx) => (
                                 <tr key={`demand-${idx}`}>
                                   <td style={{ borderBottom: '1px solid #000', borderRight: '1px solid #000', width: '30px', textAlign: 'center', padding: '5px', fontSize: '0.75rem', fontWeight: 'bold', color: '#000' }}>{idx + 1}</td>
-                                  <td style={{ borderBottom: '1px solid #000', padding: '5px 10px', fontSize: '0.8rem', color: '#000' }}>{typeof job === 'object' ? job.name : job}</td>
+                                  <td style={{ borderBottom: '1px solid #000', padding: '5px 10px', fontSize: '0.8rem', color: '#000' }}>{demand}</td>
                                 </tr>
                               ))}
-                              {filteredDemands.length === 0 && (
+                              {demandsList.length === 0 && (
                                 <tr>
                                   <td style={{ padding: '8px', fontSize: '0.8rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>Müşteri talebi bulunmamaktadır.</td>
                                 </tr>
