@@ -2340,7 +2340,16 @@ _Vos74 VAG Grubu Özel Servis_`;
               const totalRowsCount = jobsLength + extraLength + laborRowCount;
 
               return (
-                <div className="invoice-container print-paper-invoice" style={{ fontFamily: 'Arial, sans-serif', color: '#000', background: '#fff', padding: '0', boxSizing: 'border-box' }}>
+                <div className="invoice-container print-paper-invoice" style={{ 
+                  fontFamily: 'Arial, sans-serif', 
+                  color: '#000', 
+                  background: '#fff', 
+                  padding: '24px', 
+                  border: '3px solid #111827', 
+                  outline: '1px solid #111827',
+                  outlineOffset: '-6px',
+                  boxSizing: 'border-box' 
+                }}>
                   
                   {/* Top Double-Column Header Table */}
                   <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000' }}>
