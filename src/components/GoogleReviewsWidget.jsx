@@ -83,15 +83,26 @@ const GoogleIcon = () => (
 
 export default function GoogleReviewsWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+%C3%96ZEL+SERViSi+Bart%C4%B1n#lrd=0x0:0x313d4a2a27b87607,3';
+  
+  // Desktop: Google Search review modal URL (works with #lrd fragment)
+  const desktopReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+%C3%96ZEL+SERViSi+Bart%C4%B1n#lrd=0x0:0x313d4a2a27b87607,3';
+  // Mobile: Google Maps CID URL — opens Maps app/listing where user can tap "Review"
+  const mobileReviewUrl = 'https://www.google.com/maps?cid=3548588703905752583';
+
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+      || (window.innerWidth <= 768);
+  };
 
   const handleReviewClick = (e) => {
     e.preventDefault();
-    // Use window.open for reliable mobile support
-    const newWindow = window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
-    // Fallback: if popup was blocked, navigate directly
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      window.location.href = googleReviewUrl;
+    e.stopPropagation();
+    const url = isMobile() ? mobileReviewUrl : desktopReviewUrl;
+    // On mobile, use direct navigation for reliability (avoids popup blocker)
+    if (isMobile()) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -175,7 +186,7 @@ export default function GoogleReviewsWidget() {
 
           {/* Rate Us Button */}
           <a 
-            href={googleReviewUrl} 
+            href={desktopReviewUrl} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="google-rate-us-btn"
@@ -218,7 +229,7 @@ export default function GoogleReviewsWidget() {
 
           <div className="google-drawer-footer">
             <a 
-              href={googleReviewUrl} 
+              href={desktopReviewUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="google-view-all-link"
