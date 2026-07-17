@@ -83,7 +83,7 @@ const GoogleIcon = () => (
 
 export default function GoogleReviewsWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+ÖZEL+SERViSi+Yorumlar&rldimm=3547763447583768583#lkt=LocalPoiReviews&action=write-review';
+  const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+%C3%96ZEL+SERViSi+Bart%C4%B1n#lrd=0x0:0x313d4a2a27b87607,3';
 
   // Prevent background scrolling when reviews drawer is open
   useEffect(() => {
