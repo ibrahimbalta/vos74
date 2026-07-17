@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Calendar, Wrench, Plus, Check, X, Shield, PlusCircle, Trash, Search, 
   DollarSign, Package, Edit3, UserPlus, Image, MessageSquare, Settings2,
-  Share2, FileText, Clock, Sparkles, Gift, CreditCard
+  Share2, FileText, Clock, Sparkles, Gift, CreditCard, ClipboardList
 } from 'lucide-react';
 
 export default function UstaDashboard({ 
@@ -29,6 +29,13 @@ export default function UstaDashboard({
   addMarketplaceListing,
   deleteMarketplaceListing,
   
+  // Job Tracker Props
+  addRepairPart,
+  updateRepairPartStatus,
+  deleteRepairPart,
+  addRepairPayment,
+  deleteRepairPayment,
+  
   // CMS Props
   branchDetails,
   setBranchDetails,
@@ -52,11 +59,26 @@ export default function UstaDashboard({
   addBlogPost,
   deleteBlogPost
 }) {
-  const [subTab, setSubTab] = useState('repairs'); // repairs, appointments, listings, history, cms, hours
+  const [subTab, setSubTab] = useState('repairs'); // repairs, appointments, listings, history, cms, hours, jobTracker
   const [newHourInput, setNewHourInput] = useState('');
   const [includeWarrantyNote, setIncludeWarrantyNote] = useState(false);
   const [cmsSection, setCmsSection] = useState('headers'); // headers, team, testimonials, gallery
   const [searchCardText, setSearchCardText] = useState('');
+
+  // Job Tracker Local States
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [newPartName, setNewPartName] = useState('');
+  const [newPartCost, setNewPartCost] = useState('');
+  const [newPartQty, setNewPartQty] = useState(1);
+  const [newPartSupplier, setNewPartSupplier] = useState('');
+  const [newPartStatus, setNewPartStatus] = useState('Sipariş Edildi');
+  const [newPaymentAmount, setNewPaymentAmount] = useState('');
+  const [newPaymentMethod, setNewPaymentMethod] = useState('Nakit');
+  const [newPaymentNote, setNewPaymentNote] = useState('');
+  const [trackerSearchQuery, setTrackerSearchQuery] = useState('');
+  const [trackerStatusFilter, setTrackerStatusFilter] = useState('all');
+  const [showAddPartForm, setShowAddPartForm] = useState(false);
+  const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
 
   // State for Add Listing form
   const [listingTitle, setListingTitle] = useState('');
@@ -551,6 +573,41 @@ _Vos74 VAG Grubu Özel Servis_`;
     { label: 'Teslime Hazır', val: 'hazir' }
   ];
 
+  const getRepairTotalCost = (car) => {
+    const jobsCost = car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (Number(j.cost) || 0), 0) : 0;
+    const extraCost = car.extraItems ? car.extraItems.reduce((sum, e) => sum + (Number(e.cost) || 0), 0) : 0;
+    const laborCost = Number(car.laborCost) || 0;
+    const partsCost = car.parts ? car.parts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0) : 0;
+    return jobsCost + extraCost + laborCost + partsCost;
+  };
+
+  const getRepairTotalPaid = (car) => {
+    return car.payments ? car.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
+  };
+
+  const totalReceivables = (activeRepairs || []).reduce((sum, car) => {
+    const total = getRepairTotalCost(car);
+    const paid = getRepairTotalPaid(car);
+    const bal = total - paid;
+    return sum + (bal > 0 ? bal : 0);
+  }, 0);
+
+  const totalPayables = (activeRepairs || []).reduce((sum, car) => {
+    const partsVal = car.parts 
+      ? car.parts
+          .filter(p => p.status !== 'Ödendi')
+          .reduce((pSum, p) => pSum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0)
+      : 0;
+    return sum + partsVal;
+  }, 0);
+
+  const partsWaitingCount = (activeRepairs || []).reduce((sum, car) => {
+    const waiting = car.parts 
+      ? car.parts.filter(p => p.status === 'Sipariş Edildi' || p.status === 'Yolda').length
+      : 0;
+    return sum + waiting;
+  }, 0);
+
   return (
     <section className="dashboard-section">
       <div className="section-header usta-dashboard-header">
@@ -616,6 +673,15 @@ _Vos74 VAG Grubu Özel Servis_`;
         >
           <CreditCard size={16} />
           <span>Müşteri Kartları ({customerCards ? customerCards.length : 0})</span>
+        </button>
+
+        <button 
+          className={`dash-subtab-btn ${subTab === 'jobTracker' ? 'active' : ''}`}
+          onClick={() => setSubTab('jobTracker')}
+          style={{ borderLeft: '1px dashed var(--primary)', color: 'var(--accent)' }}
+        >
+          <ClipboardList size={16} />
+          <span>İş Takip & Finans</span>
         </button>
 
         <button 
@@ -1425,6 +1491,575 @@ _Vos74 VAG Grubu Özel Servis_`;
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* SUBTAB: JOB TRACKER (İŞ TAKİP VE FİNANS) */}
+      {subTab === 'jobTracker' && (
+        <div className="job-tracker-layout animate-slide-up" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Summary Dashboard Cards */}
+          <div className="job-tracker-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+            <div className="glass-card job-summary-card" style={{ padding: '20px', borderLeft: '4px solid var(--primary)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Aktif Araç Sayısı</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', width: '100%' }}>
+                <span className="text-gradient" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{(activeRepairs || []).length}</span>
+                <Wrench size={32} style={{ color: 'var(--primary)', opacity: 0.3, marginLeft: 'auto' }} />
+              </div>
+            </div>
+            
+            <div className="glass-card job-summary-card" style={{ padding: '20px', borderLeft: '4px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Bekleyen Sipariş Parçalar</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', width: '100%' }}>
+                <span className="text-gradient" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{partsWaitingCount}</span>
+                <Package size={32} style={{ color: 'var(--accent)', opacity: 0.3, marginLeft: 'auto' }} />
+              </div>
+            </div>
+
+            <div className="glass-card job-summary-card" style={{ padding: '20px', borderLeft: '4px solid #22c55e', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Toplam Alacak (Müşteri)</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', width: '100%' }}>
+                <span className="text-gradient" style={{ fontSize: '1.7rem', fontWeight: 'bold' }}>{totalReceivables.toLocaleString('tr-TR')} TL</span>
+                <DollarSign size={32} style={{ color: '#22c55e', opacity: 0.3, marginLeft: 'auto' }} />
+              </div>
+            </div>
+
+            <div className="glass-card job-summary-card" style={{ padding: '20px', borderLeft: '4px solid #ef4444', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Toplam Verecek (Tedarikçi)</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', width: '100%' }}>
+                <span className="text-gradient" style={{ fontSize: '1.7rem', fontWeight: 'bold' }}>{totalPayables.toLocaleString('tr-TR')} TL</span>
+                <DollarSign size={32} style={{ color: '#ef4444', opacity: 0.3, marginLeft: 'auto' }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Layout Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: selectedJobId ? '1fr 1fr' : '1fr', gap: '24px', alignItems: 'start' }}>
+            
+            {/* Left Side: Active Job List */}
+            <div className="glass" style={{ padding: '20px', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+                <h4 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ClipboardList className="text-gradient" size={20} />
+                  <span>Aktif İş Takip Listesi</span>
+                </h4>
+                
+                {/* Search box */}
+                <div style={{ position: 'relative', width: '220px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Plaka veya Müşteri Ara..." 
+                    value={trackerSearchQuery}
+                    onChange={(e) => setTrackerSearchQuery(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px 8px 32px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                </div>
+              </div>
+
+              {/* Status Filter Bar */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '6px' }} className="no-print">
+                {['all', 'kabul', 'ariza', 'onarim', 'test', 'hazir'].map((filt) => (
+                  <button
+                    key={filt}
+                    onClick={() => setTrackerStatusFilter(filt)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      border: '1px solid var(--border-color)',
+                      background: trackerStatusFilter === filt ? 'var(--primary)' : 'rgba(255,255,255,0.02)',
+                      color: trackerStatusFilter === filt ? '#fff' : 'var(--text-secondary)',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {filt === 'all' ? 'Tüm Durumlar' : steps.find(s => s.val === filt)?.label || filt}
+                  </button>
+                ))}
+              </div>
+
+              <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                      <th style={{ padding: '10px' }}>Plaka / Müşteri</th>
+                      <th style={{ padding: '10px' }}>Durum</th>
+                      <th style={{ padding: '10px' }}>Parça</th>
+                      <th style={{ padding: '10px' }}>Bakiye</th>
+                      <th style={{ padding: '10px', textAlign: 'center' }}>İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(activeRepairs || [])
+                      .filter(car => {
+                        const q = trackerSearchQuery.toLowerCase().trim();
+                        const matchesSearch = !q || car.plate.toLowerCase().includes(q) || car.owner.toLowerCase().includes(q) || car.model.toLowerCase().includes(q);
+                        const matchesFilter = trackerStatusFilter === 'all' || car.status === trackerStatusFilter;
+                        return matchesSearch && matchesFilter;
+                      })
+                      .map(car => {
+                        const totalCost = getRepairTotalCost(car);
+                        const paid = getRepairTotalPaid(car);
+                        const balance = totalCost - paid;
+                        const partsCount = car.parts ? car.parts.length : 0;
+                        const isSelected = selectedJobId === car.id;
+                        
+                        return (
+                          <tr 
+                            key={car.id} 
+                            style={{ 
+                              borderBottom: '1px solid var(--border-color)', 
+                              fontSize: '0.85rem',
+                              background: isSelected ? 'rgba(6, 182, 212, 0.05)' : 'transparent',
+                              transition: 'background-color 0.2s'
+                            }}
+                          >
+                            <td style={{ padding: '12px 10px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span className="plate-badge" style={{ fontSize: '0.75rem', width: 'fit-content' }}>{car.plate}</span>
+                                <strong style={{ color: '#fff' }}>{car.owner}</strong>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{car.model.split('(')[0]}</span>
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 10px' }}>
+                              <span 
+                                className="badge" 
+                                style={{ 
+                                  fontSize: '0.7rem', 
+                                  padding: '2px 8px', 
+                                  background: car.status === 'hazir' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255,255,255,0.05)',
+                                  color: car.status === 'hazir' ? '#22c55e' : 'var(--text-primary)'
+                                }}
+                              >
+                                {steps.find(s => s.val === car.status)?.label || car.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 10px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                                <span>{partsCount} Adet</span>
+                                {car.parts && car.parts.some(p => p.status === 'Sipariş Edildi' || p.status === 'Yolda') && (
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 'bold' }}>⚠️ Bekleyen Var</span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 10px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ color: '#fff', fontWeight: 'bold' }}>{totalCost} TL</span>
+                                {balance > 0 ? (
+                                  <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 'bold' }}>Kalan: {balance} TL</span>
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 'bold' }}>✓ Ödendi</span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                              <button
+                                onClick={() => setSelectedJobId(isSelected ? null : car.id)}
+                                className="glow-btn"
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.75rem',
+                                  background: isSelected ? 'var(--accent)' : 'var(--primary)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {isSelected ? 'Kapat' : 'Finans & Parça'}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Right Side: Detailed Section for Selected Job */}
+            {selectedJobId ? (() => {
+              const car = activeRepairs.find(c => c.id === selectedJobId);
+              if (!car) return null;
+              
+              const totalCost = getRepairTotalCost(car);
+              const paid = getRepairTotalPaid(car);
+              const balance = totalCost - paid;
+              
+              return (
+                <div className="glass-card animate-slide-up" style={{ padding: '20px', borderRadius: '12px', border: '1px solid var(--primary)', boxShadow: '0 8px 30px rgba(6, 182, 212, 0.1)' }}>
+                  
+                  {/* Detail Panel Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px', marginBottom: '18px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                        <span className="plate-badge-large">{car.plate}</span>
+                        <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#fff' }}>{car.model}</h4>
+                      </div>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Müşteri: <strong>{car.owner}</strong> ({car.phone})</span>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedJobId(null)}
+                      style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', padding: '4px' }}
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  {/* Financial Quick Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>Toplam Tutar</span>
+                      <strong style={{ fontSize: '1.05rem', color: '#fff' }}>{totalCost} TL</strong>
+                    </div>
+                    <div style={{ background: 'rgba(34, 197, 94, 0.05)', padding: '10px', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(34, 197, 94, 0.1)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>Ödenen</span>
+                      <strong style={{ fontSize: '1.05rem', color: '#22c55e' }}>{paid} TL</strong>
+                    </div>
+                    <div style={{ background: balance > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)', padding: '10px', borderRadius: '8px', textAlign: 'center', border: balance > 0 ? '1px solid rgba(239, 68, 68, 0.1)' : '1px solid rgba(34, 197, 94, 0.1)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>Kalan Alacak</span>
+                      <strong style={{ fontSize: '1.05rem', color: balance > 0 ? '#ef4444' : '#22c55e' }}>{balance} TL</strong>
+                    </div>
+                  </div>
+
+                  {/* Parts Management (Parça Takibi) */}
+                  <div style={{ marginBottom: '24px', borderTop: '1px dashed var(--border-color)', paddingTop: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h5 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)' }}>
+                        <Package size={16} />
+                        <span>Kullanılan Yedek Parçalar ({car.parts ? car.parts.length : 0})</span>
+                      </h5>
+                      <button
+                        onClick={() => setShowAddPartForm(!showAddPartForm)}
+                        className="glow-btn"
+                        style={{ padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px' }}
+                      >
+                        {showAddPartForm ? 'İptal' : 'Yeni Ekle'}
+                      </button>
+                    </div>
+
+                    {showAddPartForm && (
+                      <form 
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (newPartName && newPartCost) {
+                            addRepairPart && addRepairPart(car.id, newPartName, newPartCost, newPartQty, newPartSupplier, newPartStatus);
+                            setNewPartName('');
+                            setNewPartCost('');
+                            setNewPartQty(1);
+                            setNewPartSupplier('');
+                            setShowAddPartForm(false);
+                          }
+                        }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '12px' }}
+                      >
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Parça Adı (Örn: Ön Amortisör)"
+                            value={newPartName}
+                            onChange={(e) => setNewPartName(e.target.value)}
+                            required
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                          <input 
+                            type="number" 
+                            placeholder="Birim Fiyat"
+                            value={newPartCost}
+                            onChange={(e) => setNewPartCost(e.target.value)}
+                            required
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                          <input 
+                            type="number" 
+                            placeholder="Adet"
+                            min="1"
+                            value={newPartQty}
+                            onChange={(e) => setNewPartQty(e.target.value)}
+                            required
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="Tedarikçi (Örn: Özdemir Oto)"
+                            value={newPartSupplier}
+                            onChange={(e) => setNewPartSupplier(e.target.value)}
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', justifySelf: 'stretch' }}>
+                          <select
+                            value={newPartStatus}
+                            onChange={(e) => setNewPartStatus(e.target.value)}
+                            style={{ flex: 1, padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', outline: 'none' }}
+                          >
+                            <option value="Sipariş Edildi">Sipariş Edildi</option>
+                            <option value="Yolda">Yolda</option>
+                            <option value="Geldi">Geldi</option>
+                            <option value="Takıldı">Takıldı</option>
+                            <option value="Ödendi">Ödendi (Borçsuz)</option>
+                          </select>
+                          <button type="submit" className="glow-btn" style={{ padding: '6px 16px', fontSize: '0.8rem', borderRadius: '4px' }}>Ekle</button>
+                        </div>
+                      </form>
+                    )}
+
+                    {car.parts && car.parts.length > 0 ? (
+                      <div className="table-responsive" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                              <th style={{ padding: '6px' }}>Parça / Tedarikçi</th>
+                              <th style={{ padding: '6px' }}>Fiyat / Adet</th>
+                              <th style={{ padding: '6px' }}>Durum</th>
+                              <th style={{ padding: '6px', textAlign: 'center' }}>Sil</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {car.parts.map((part) => (
+                              <tr key={part.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '8px 6px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <strong>{part.name}</strong>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>🔍 {part.supplier || 'Belirtilmedi'}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '8px 6px' }}>{part.cost} TL x {part.qty}</td>
+                                <td style={{ padding: '8px 6px' }}>
+                                  <select
+                                    value={part.status}
+                                    onChange={(e) => updateRepairPartStatus && updateRepairPartStatus(car.id, part.id, e.target.value)}
+                                    style={{ 
+                                      padding: '2px 4px', 
+                                      fontSize: '0.75rem', 
+                                      background: part.status === 'Ödendi' ? 'rgba(34, 197, 94, 0.1)' : part.status === 'Takıldı' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(249, 115, 22, 0.1)', 
+                                      color: part.status === 'Ödendi' ? '#22c55e' : part.status === 'Takıldı' ? 'var(--primary)' : 'var(--accent)', 
+                                      border: 'none', 
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <option value="Sipariş Edildi">Sipariş Edildi</option>
+                                    <option value="Yolda">Yolda</option>
+                                    <option value="Geldi">Geldi</option>
+                                    <option value="Takıldı">Takıldı</option>
+                                    <option value="Ödendi">Ödendi</option>
+                                  </select>
+                                </td>
+                                <td style={{ padding: '8px 6px', textAlign: 'center' }}>
+                                  <button 
+                                    onClick={() => deleteRepairPart && deleteRepairPart(car.id, part.id)}
+                                    style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                                  >
+                                    <Trash size={12} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Bu araca henüz parça eklenmemiş.</p>
+                    )}
+                  </div>
+
+                  {/* Customer Payments (Ödeme Takibi) */}
+                  <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h5 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }}>
+                        <DollarSign size={16} />
+                        <span>Müşteri Ödeme Tahsilatları ({car.payments ? car.payments.length : 0})</span>
+                      </h5>
+                      <button
+                        onClick={() => setShowAddPaymentForm(!showAddPaymentForm)}
+                        className="glow-btn"
+                        style={{ padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', background: '#22c55e' }}
+                      >
+                        {showAddPaymentForm ? 'İptal' : 'Tahsilat Ekle'}
+                      </button>
+                    </div>
+
+                    {showAddPaymentForm && (
+                      <form 
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (newPaymentAmount) {
+                            addRepairPayment && addRepairPayment(car.id, newPaymentAmount, newPaymentMethod, newPaymentNote);
+                            setNewPaymentAmount('');
+                            setNewPaymentNote('');
+                            setShowAddPaymentForm(false);
+                          }
+                        }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '12px' }}
+                      >
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <input 
+                            type="number" 
+                            placeholder="Tutar (TL)"
+                            value={newPaymentAmount}
+                            onChange={(e) => setNewPaymentAmount(e.target.value)}
+                            required
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                          <select
+                            value={newPaymentMethod}
+                            onChange={(e) => setNewPaymentMethod(e.target.value)}
+                            style={{ padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', outline: 'none' }}
+                          >
+                            <option value="Nakit">Nakit</option>
+                            <option value="Kredi Kartı">Kredi Kartı</option>
+                            <option value="Havale/EFT">Havale/EFT</option>
+                          </select>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Ödeme Notu (Örn: Kapora alındı)"
+                            value={newPaymentNote}
+                            onChange={(e) => setNewPaymentNote(e.target.value)}
+                            style={{ flex: 1, padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff' }}
+                          />
+                          <button type="submit" className="glow-btn" style={{ padding: '6px 16px', fontSize: '0.8rem', borderRadius: '4px', background: '#22c55e' }}>Kaydet</button>
+                        </div>
+                      </form>
+                    )}
+
+                    {car.payments && car.payments.length > 0 ? (
+                      <div className="table-responsive" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                              <th style={{ padding: '6px' }}>Tarih / Not</th>
+                              <th style={{ padding: '6px' }}>Yöntem</th>
+                              <th style={{ padding: '6px', textAlign: 'right' }}>Tutar</th>
+                              <th style={{ padding: '6px', textAlign: 'center' }}>Sil</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {car.payments.map((pay) => (
+                              <tr key={pay.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '8px 6px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span>{pay.date}</span>
+                                    {pay.note && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📝 {pay.note}</span>}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '8px 6px' }}>
+                                  <span className="badge" style={{ fontSize: '0.7rem', padding: '1px 6px' }}>{pay.method}</span>
+                                </td>
+                                <td style={{ padding: '8px 6px', textAlign: 'right', fontWeight: 'bold', color: '#22c55e' }}>+{pay.amount} TL</td>
+                                <td style={{ padding: '8px 6px', textAlign: 'center' }}>
+                                  <button 
+                                    onClick={() => deleteRepairPayment && deleteRepairPayment(car.id, pay.id)}
+                                    style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                                  >
+                                    <Trash size={12} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Henüz ödeme tahsil edilmemiş.</p>
+                    )}
+                  </div>
+
+                </div>
+              );
+            })() : (
+              <div className="glass-card" style={{ padding: '40px 20px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', minHeight: '300px' }}>
+                <ClipboardList size={48} style={{ opacity: 0.2, marginBottom: '15px' }} />
+                <h5>Araç Cari Detay Paneli</h5>
+                <p style={{ fontSize: '0.85rem', maxWidth: '300px', margin: '0' }}>Sol taraftaki listeden bir araç seçerek yedek parça siparişlerini, tedarikçileri ve müşteri tahsilat ödemelerini bu panelden yönetebilirsiniz.</p>
+              </div>
+            )}
+
+          </div>
+
+          {/* Supplier Payables Subsection (Tedarikçi Borç Listesi - Verecekler) */}
+          <div className="glass" style={{ padding: '20px', borderRadius: '12px', marginTop: '10px' }}>
+            <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+              <Package size={20} />
+              <span>Tedarikçi Borç Listesi (Ödenmesi Gereken Parçalar / Verecekler)</span>
+            </h4>
+            
+            {(() => {
+              // Group all parts that are NOT paid across all active repairs
+              const unpaidPartsBySupplier = {};
+              (activeRepairs || []).forEach(car => {
+                if (car.parts) {
+                  car.parts.forEach(part => {
+                    if (part.status !== 'Ödendi' && part.supplier && part.supplier.trim() !== '') {
+                      const sup = part.supplier.trim();
+                      if (!unpaidPartsBySupplier[sup]) {
+                        unpaidPartsBySupplier[sup] = [];
+                      }
+                      unpaidPartsBySupplier[sup].push({ ...part, carId: car.id, plate: car.plate, owner: car.owner });
+                    }
+                  });
+                }
+              });
+
+              const suppliers = Object.keys(unpaidPartsBySupplier);
+              if (suppliers.length === 0) {
+                return <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tedarikçilere ödenmesi gereken aktif bir parça borcu bulunmamaktadır. Borç takibi için eklediğiniz parçaların durumunu 'Ödendi' harici tutabilirsiniz.</p>;
+              }
+
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                  {suppliers.map(supName => {
+                    const partsList = unpaidPartsBySupplier[supName];
+                    const supTotal = partsList.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0);
+                    
+                    return (
+                      <div key={supName} className="glass-card" style={{ padding: '16px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.02)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+                          <strong style={{ color: '#fff', fontSize: '0.9rem' }}>{supName}</strong>
+                          <span style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '0.9rem' }}>{supTotal} TL</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {partsList.map(part => (
+                            <div key={part.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
+                              <div>
+                                <span style={{ color: 'var(--text-secondary)' }}>{part.name} ({part.qty} adet)</span>
+                                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>🚗 Plaka: {part.plate} ({part.owner})</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span className="badge" style={{ fontSize: '0.65rem', padding: '1px 4px', background: 'rgba(249, 115, 22, 0.1)', color: 'var(--accent)' }}>{part.status}</span>
+                                <button
+                                  onClick={() => updateRepairPartStatus && updateRepairPartStatus(part.carId, part.id, 'Ödendi')}
+                                  style={{
+                                    padding: '2px 6px',
+                                    fontSize: '0.65rem',
+                                    background: '#22c55e',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Tedarikçiye Ödendi olarak işaretle"
+                                >
+                                  Öde
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+          </div>
+
         </div>
       )}
 

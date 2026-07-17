@@ -1003,6 +1003,127 @@ function App() {
     }
   };
 
+  const addRepairPart = async (carId, partName, cost, qty, supplier, status) => {
+    const updated = activeRepairs.map(car => {
+      if (String(car.id) === String(carId)) {
+        const newPart = {
+          id: 'part-' + Date.now() + Math.random().toString(36).substr(2, 4),
+          name: partName,
+          cost: Number(cost) || 0,
+          qty: Number(qty) || 1,
+          supplier: supplier || 'Belirtilmedi',
+          status: status || 'Sipariş Edildi'
+        };
+        return {
+          ...car,
+          parts: [...(car.parts || []), newPart]
+        };
+      }
+      return car;
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(carId));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(carId)), targetCar);
+      } catch (e) {
+        console.error("Firestore addRepairPart failed:", e);
+      }
+    }
+  };
+
+  const updateRepairPartStatus = async (carId, partId, newStatus) => {
+    const updated = activeRepairs.map(car => {
+      if (String(car.id) === String(carId)) {
+        return {
+          ...car,
+          parts: (car.parts || []).map(p => p.id === partId ? { ...p, status: newStatus } : p)
+        };
+      }
+      return car;
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(carId));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(carId)), targetCar);
+      } catch (e) {
+        console.error("Firestore updateRepairPartStatus failed:", e);
+      }
+    }
+  };
+
+  const deleteRepairPart = async (carId, partId) => {
+    const updated = activeRepairs.map(car => {
+      if (String(car.id) === String(carId)) {
+        return {
+          ...car,
+          parts: (car.parts || []).filter(p => p.id !== partId)
+        };
+      }
+      return car;
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(carId));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(carId)), targetCar);
+      } catch (e) {
+        console.error("Firestore deleteRepairPart failed:", e);
+      }
+    }
+  };
+
+  const addRepairPayment = async (carId, amount, method, note) => {
+    const updated = activeRepairs.map(car => {
+      if (String(car.id) === String(carId)) {
+        const newPayment = {
+          id: 'pay-' + Date.now() + Math.random().toString(36).substr(2, 4),
+          amount: Number(amount) || 0,
+          method: method || 'Nakit',
+          date: new Date().toLocaleDateString('tr-TR'),
+          note: note || ''
+        };
+        return {
+          ...car,
+          payments: [...(car.payments || []), newPayment]
+        };
+      }
+      return car;
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(carId));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(carId)), targetCar);
+      } catch (e) {
+        console.error("Firestore addRepairPayment failed:", e);
+      }
+    }
+  };
+
+  const deleteRepairPayment = async (carId, paymentId) => {
+    const updated = activeRepairs.map(car => {
+      if (String(car.id) === String(carId)) {
+        return {
+          ...car,
+          payments: (car.payments || []).filter(p => p.id !== paymentId)
+        };
+      }
+      return car;
+    });
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(carId));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(carId)), targetCar);
+      } catch (e) {
+        console.error("Firestore deleteRepairPayment failed:", e);
+      }
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="app-loader-container">
@@ -1174,6 +1295,11 @@ function App() {
               setCampaigns={handleSetCampaigns}
               customerCards={customerCards}
               deleteCustomerCard={deleteCustomerCard}
+              addRepairPart={addRepairPart}
+              updateRepairPartStatus={updateRepairPartStatus}
+              deleteRepairPart={deleteRepairPart}
+              addRepairPayment={addRepairPayment}
+              deleteRepairPayment={deleteRepairPayment}
               currentBranch={branch}
               onLogout={() => setIsAuthenticated(false)}
             />

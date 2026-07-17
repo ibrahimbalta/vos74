@@ -5873,4 +5873,58 @@
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
+/* ==========================================================================
+   JOB TRACKER & FINANCE DASHBOARD STYLES
+   ========================================================================== */
+.job-tracker-summary-grid {
+  margin-bottom: 10px;
+}
+
+.job-summary-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  transition: var(--theme-transition);
+}
+
+.job-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+  background: var(--card-hover-bg);
+}
+
+.job-tracker-layout table th {
+  font-family: var(--font-title);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.job-tracker-layout table tr {
+  transition: var(--theme-transition);
+}
+
+.job-tracker-layout table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.job-tracker-layout select {
+  font-family: var(--font-body);
+  transition: var(--theme-transition);
+}
+
+.job-tracker-layout select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+@media (max-width: 992px) {
+  .job-tracker-layout > div {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
 
