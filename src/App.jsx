@@ -932,7 +932,22 @@ function App() {
         ...(laborTotal > 0 ? [`Toptan İşçilik (${laborTotal} TL)`] : [])
       ].join(', '),
       cost: totalCost,
-      master: targetCar.assignedUsta || 'Nuri Usta'
+      master: targetCar.assignedUsta || 'Nuri Usta',
+      // Full vehicle details for service receipt generation
+      id: targetCar.id,
+      owner: targetCar.owner || '',
+      phone: targetCar.phone || '',
+      km: targetCar.km || '',
+      chassis: targetCar.chassis || '',
+      motorNo: targetCar.motorNo || '',
+      broughtBy: targetCar.broughtBy || '',
+      advisor: targetCar.advisor || '',
+      assignedUsta: targetCar.assignedUsta || '',
+      customerDemands: targetCar.customerDemands || '',
+      deliveryTime: targetCar.deliveryTime || '',
+      jobsDone: targetCar.jobsDone || [],
+      extraItems: targetCar.extraItems || [],
+      laborCost: targetCar.laborCost || 0
     };
 
     setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));

@@ -1388,14 +1388,49 @@ _Vos74 VAG Grubu Özel Servis_`;
           </form>
 
           <div className="history-results-area">
-            {historyResult === 'notfound' && <p>Sonuç bulunamadı (Demo için 34ABC123 yazın)</p>}
+            {historyResult === 'notfound' && <p>Sonuç bulunamadı.</p>}
             {historyResult && historyResult !== 'notfound' && (
               <div className="history-success-card glass-card">
                 <h5>{historyResult.plate} - {historyResult.model} Geçmişi</h5>
                 <div className="history-timeline">
                   {historyResult.history.map((record, idx) => (
-                    <div key={idx} className="history-timeline-item">
-                      <p>📅 {record.date} | 💰 {record.cost} TL - {record.desc} (Usta: {record.master})</p>
+                    <div key={idx} className="history-timeline-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                      <p style={{ flex: 1, margin: 0 }}>📅 {record.date} | 💰 {record.cost} TL - {record.desc} (Usta: {record.master})</p>
+                      <button
+                        type="button"
+                        className="glow-btn"
+                        style={{ padding: '6px 14px', fontSize: '0.78rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                        onClick={() => {
+                          // If record has full detail data (jobsDone), use directly
+                          // Otherwise build a minimal structure from desc for legacy records
+                          const receiptCar = {
+                            ...record,
+                            plate: record.plate || historyResult.plate,
+                            model: record.model || historyResult.model,
+                            owner: record.owner || '',
+                            phone: record.phone || '',
+                            km: record.km || '',
+                            chassis: record.chassis || '',
+                            motorNo: record.motorNo || '',
+                            broughtBy: record.broughtBy || '',
+                            advisor: record.advisor || '',
+                            assignedUsta: record.assignedUsta || record.master || '',
+                            customerDemands: record.customerDemands || '',
+                            deliveryTime: record.date || '',
+                            jobsDone: record.jobsDone && record.jobsDone.length > 0
+                              ? record.jobsDone
+                              : record.desc
+                                ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
+                                : [],
+                            extraItems: record.extraItems || [],
+                            laborCost: record.laborCost || 0,
+                            id: record.id || (idx + 1)
+                          };
+                          setPrintingCar(receiptCar);
+                        }}
+                      >
+                        <FileText size={14} /> Servis Fişi
+                      </button>
                     </div>
                   ))}
                 </div>
