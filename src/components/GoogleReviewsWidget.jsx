@@ -85,6 +85,16 @@ export default function GoogleReviewsWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+%C3%96ZEL+SERViSi+Bart%C4%B1n#lrd=0x0:0x313d4a2a27b87607,3';
 
+  const handleReviewClick = (e) => {
+    e.preventDefault();
+    // Use window.open for reliable mobile support
+    const newWindow = window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
+    // Fallback: if popup was blocked, navigate directly
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      window.location.href = googleReviewUrl;
+    }
+  };
+
   // Prevent background scrolling when reviews drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -169,6 +179,7 @@ export default function GoogleReviewsWidget() {
             target="_blank" 
             rel="noopener noreferrer" 
             className="google-rate-us-btn"
+            onClick={handleReviewClick}
           >
             Bizi Değerlendirin
             <ExternalLink size={16} />
@@ -211,6 +222,7 @@ export default function GoogleReviewsWidget() {
               target="_blank" 
               rel="noopener noreferrer" 
               className="google-view-all-link"
+              onClick={handleReviewClick}
             >
               Google'da tüm yorumları gör
               <ChevronRight size={16} />
