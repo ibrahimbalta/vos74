@@ -22,6 +22,7 @@ import Blog from './components/Blog';
 import Footer from './components/Footer';
 import CampaignPopup from './components/CampaignPopup';
 import CustomerCardGenerator from './components/CustomerCardGenerator';
+import GoogleReviewsWidget from './components/GoogleReviewsWidget';
 import './App.css';
 
 const defaultCampaigns = [
@@ -1186,6 +1187,9 @@ function App() {
 
       {/* Footer */}
       <Footer currentBranchName={activeBranchInfo.name} socialLinks={socialLinks} />
+
+      {/* Google Reviews Widget (Floating Badge & Drawer) */}
+      <GoogleReviewsWidget />
 
       {/* Mobile Floating Action Buttons */}
       <div className="mobile-fab-container">
