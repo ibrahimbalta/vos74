@@ -1,52 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { Star, X, ExternalLink, ChevronRight } from 'lucide-react';
+import { Star, StarHalf, X, ExternalLink, ChevronRight } from 'lucide-react';
 import './GoogleReviewsWidget.css';
 
 const googleReviewsData = [
   {
     id: 1,
-    name: 'Mustafa Yılmaz',
+    name: 'Ramazan Demir',
     rating: 5,
-    date: '3 ay önce',
-    text: 'Bartın için değer niteliğinde bir işletme. Garantili veya garantisi bitmiş her marka model araca, yetkili servis hassasiyeti ile bakım yapılıyor. Kesinlikle tavsiye ederim.',
-    avatarColor: '#b71c1c', // Dark red as seen in the image (M avatar)
-    initial: 'M'
+    date: '2 yıl önce',
+    text: 'Gece yolda kaldım, acil işim vardı sağ olsunlar çok yardımcı oldular.',
+    avatarColor: '#1e88e5',
+    initial: 'R'
   },
   {
     id: 2,
-    name: 'Adem T',
+    name: 'Burhan Gul',
     rating: 5,
-    date: '2 ay önce',
-    text: 'Bartın için gerçekten bir nimet olmuş açanlardan Allah razı olsun, aracımı 1 yıl önce aldım klima sorunu vardı bütün Bartın sanayisini gezdim çözemediler, burada Kadir usta 10 dakikada çözdü.',
-    avatarColor: '#4a148c', // Purple (A avatar)
-    initial: 'A'
+    date: '4 yıl önce',
+    text: 'On numara 5 yıldız bir servis',
+    avatarColor: '#43a047',
+    initial: 'B'
   },
   {
     id: 3,
-    name: 'Yusuf Demir',
+    name: 'ibrahim baltacioglu',
     rating: 5,
-    date: '1 ay önce',
-    text: 'VAG grubu aracınız varsa Bartın ve çevre illerde gidebileceğiniz tek adres. Güler yüzlü hizmet, kaliteli işçilik ve şeffaf fiyatlandırma. Çok memnun kaldım.',
-    avatarColor: '#0d47a1', // Blue
-    initial: 'Y'
+    date: '6 yıl önce',
+    text: 'Tavsiye ederim',
+    avatarColor: '#e53935',
+    initial: 'İ'
   },
   {
     id: 4,
-    name: 'Merve K.',
-    rating: 5,
-    date: '2 hafta önce',
-    text: 'Aracımın DSG şanzıman arızasını aynı gün içinde yapıp teslim ettiler. Nuri usta işinin ehli, fiyatları da yetkili servise göre çok makul. Teşekkürler.',
-    avatarColor: '#006064', // Cyan
-    initial: 'M'
+    name: 'Ali Rıza',
+    rating: 4,
+    date: '1 yıl önce',
+    text: 'Volkswagen Golf aracımın periyodik bakımı için gittim. İlgi ve bilgilendirmeleri gayet iyiydi. Fiyatlar yetkili servise göre çok uygun.',
+    avatarColor: '#ffb300',
+    initial: 'A'
   },
   {
     id: 5,
-    name: 'Hakan Şen',
+    name: 'Kamil Şen',
+    rating: 4,
+    date: '2 yıl önce',
+    text: 'DSG şanzıman titreme sorununu çözdüler. Deneyimli bir kadrosu var.',
+    avatarColor: '#3949ab',
+    initial: 'K'
+  },
+  {
+    id: 6,
+    name: 'Erol Kaya',
     rating: 5,
-    date: '3 hafta önce',
-    text: 'Periyodik bakım ve arıza tespit için tercih ettim. ODIS cihazıyla bağlayıp tüm gizli özellikleri de açtılar. Bartın\'da böyle profesyonel bir ekibin olması harika.',
-    avatarColor: '#e65100', // Orange
-    initial: 'H'
+    date: '3 yıl önce',
+    text: 'Kadir Usta ve ekibine teşekkür ederim. Bilgisayarlı arıza tespit ve online kodlama konusunda Bartın\'da tekler.',
+    avatarColor: '#8e24aa',
+    initial: 'E'
   }
 ];
 
@@ -74,7 +83,7 @@ const GoogleIcon = () => (
 
 export default function GoogleReviewsWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+%C3%96ZEL+SERViSi+Yorumlar&rflfq=1&num=20#lkt=LocalPoiReviews';
+  const googleReviewUrl = 'https://www.google.com/search?q=VOS74+VOLKSWAGEN+ÖZEL+SERViSi+Yorumlar&rldimm=3547763447583768583#lkt=LocalPoiReviews&action=write-review';
 
   // Prevent background scrolling when reviews drawer is open
   useEffect(() => {
@@ -106,11 +115,12 @@ export default function GoogleReviewsWidget() {
         <div className="google-badge-logo-container">
           <GoogleIcon />
         </div>
-        <div className="google-badge-rating-val">4.9</div>
+        <div className="google-badge-rating-val">4.3</div>
         <div className="google-badge-stars">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <Star key={i} size={14} className="star-filled-google" fill="#FFC107" color="#FFC107" />
           ))}
+          <StarHalf size={14} className="star-filled-google" fill="#FFC107" color="#FFC107" />
         </div>
       </div>
 
@@ -141,14 +151,15 @@ export default function GoogleReviewsWidget() {
         <div className="google-drawer-content">
           {/* Summary Score Card */}
           <div className="google-summary-card">
-            <div className="google-summary-score">4.9</div>
+            <div className="google-summary-score">4.3</div>
             <div className="google-summary-stars-wrapper">
               <div className="google-summary-stars">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(4)].map((_, i) => (
                   <Star key={i} size={18} className="star-filled-google" fill="#FFC107" color="#FFC107" />
                 ))}
+                <StarHalf size={18} className="star-filled-google" fill="#FFC107" color="#FFC107" />
               </div>
-              <div className="google-summary-count">Google Haritalar üzerinde 120+ Değerlendirme</div>
+              <div className="google-summary-count">Google Haritalar üzerinde 16 Değerlendirme</div>
             </div>
           </div>
 
