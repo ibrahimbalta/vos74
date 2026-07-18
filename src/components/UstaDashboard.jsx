@@ -27,6 +27,8 @@ export default function UstaDashboard({
   updateRepairCustomTotalCost,
   updateRepairCustomPartsCost,
   updateRepairCustomerDemands,
+  addRepairPhoto,
+  deleteRepairPhoto,
   addPendingRequest, 
   addActiveRepair,
   updateRepairBayAndUsta,
@@ -207,6 +209,12 @@ export default function UstaDashboard({
   const [newExtraItemCost, setNewExtraItemCost] = useState('');
   const [extraItemPhone, setExtraItemPhone] = useState('');
   const [activeExtraFormId, setActiveExtraFormId] = useState(null);
+
+  // State for Vehicle Photos management
+  const [activePhotoFormId, setActivePhotoFormId] = useState(null);
+  const [newPhotoTitle, setNewPhotoTitle] = useState('');
+  const [newPhotoCategory, setNewPhotoCategory] = useState('Kabul / Teşhis');
+  const [newPhotoUrl, setNewPhotoUrl] = useState('');
   
   // State for invoice print preview & job editing
   const [printingCar, setPrintingCar] = useState(null);
@@ -1240,6 +1248,139 @@ _Vos74 VAG Grubu Özel Servis_`;
                           <span>Ekstra Onarım/Parça Onayı İste</span>
                         </button>
                       )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Araç Fotoğrafları / Görselleri Yönetim Alanı */}
+                <div className="manage-jobs-box glass" style={{ marginTop: '12px', border: '1px dashed rgba(6, 182, 212, 0.3)', borderRadius: '10px', padding: '12px' }}>
+                  <h6 style={{ margin: '0 0 8px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Image size={15} className="text-primary" />
+                      <span>Araç Servis Fotoğrafları ({car.photos ? car.photos.length : 0})</span>
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        if (activePhotoFormId === car.id) {
+                          setActivePhotoFormId(null);
+                        } else {
+                          setActivePhotoFormId(car.id);
+                          setNewPhotoUrl('');
+                          setNewPhotoTitle('');
+                        }
+                      }}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Plus size={14} />
+                      <span>{activePhotoFormId === car.id ? 'Kapat' : 'Fotoğraf Ekle'}</span>
+                    </button>
+                  </h6>
+
+                  {/* Display photos thumbnails */}
+                  {car.photos && car.photos.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginBottom: activePhotoFormId === car.id ? '12px' : '0' }}>
+                      {car.photos.map((p, pIdx) => (
+                        <div key={pIdx} style={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-color)', aspectRatio: '4/3', background: '#000' }}>
+                          <img src={p.url} alt={p.title || 'Fotoğraf'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '0.65rem', padding: '2px 4px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                            {p.category || p.title || 'Görsel'}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => deleteRepairPhoto && deleteRepairPhoto(car.id, pIdx)}
+                            style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(239,68,68,0.85)', border: 'none', borderRadius: '50%', color: '#fff', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            title="Sil"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ margin: '4px 0', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      Henüz bu araç için fotoğraf yüklenmedi. Fotoğraf eklemek için sağ üstteki düğmeye basın.
+                    </p>
+                  )}
+
+                  {/* Photo Add Form */}
+                  {activePhotoFormId === car.id && (
+                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Cihazınızdan Fotoğraf Seçin</label>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (uploadEvt) => {
+                                setNewPhotoUrl(uploadEvt.target.result);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <input 
+                          type="text" 
+                          placeholder="Veya Görsel URL'si (Örn: /before_engine.png)" 
+                          value={newPhotoUrl}
+                          onChange={(e) => setNewPhotoUrl(e.target.value)}
+                          style={{ flexGrow: 1, padding: '6px 10px', fontSize: '0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <input 
+                          type="text" 
+                          placeholder="Fotoğraf Notu (Örn: Sağ Kapı Çiziği)" 
+                          value={newPhotoTitle}
+                          onChange={(e) => setNewPhotoTitle(e.target.value)}
+                          style={{ flexGrow: 1, padding: '6px 10px', fontSize: '0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                        />
+                        <select
+                          value={newPhotoCategory}
+                          onChange={(e) => setNewPhotoCategory(e.target.value)}
+                          style={{ padding: '6px 8px', fontSize: '0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', outline: 'none' }}
+                        >
+                          <option value="Kabul / Teşhis">Kabul / Teşhis</option>
+                          <option value="Arızalı Parça">Arızalı Parça</option>
+                          <option value="Onarım Aşaması">Onarım Aşaması</option>
+                          <option value="Teslimat Hazır">Teslimat Hazır</option>
+                        </select>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                        <button 
+                          type="button"
+                          className="glow-btn"
+                          style={{ padding: '6px 14px', fontSize: '0.78rem', borderRadius: '6px' }}
+                          onClick={() => {
+                            if (!newPhotoUrl) {
+                              alert('Lütfen bir fotoğraf dosyası seçin veya URL girin.');
+                              return;
+                            }
+                            if (addRepairPhoto) {
+                              addRepairPhoto(car.id, {
+                                url: newPhotoUrl,
+                                title: newPhotoTitle || 'Servis Fotoğrafı',
+                                category: newPhotoCategory,
+                                date: 'Bugün ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+                              });
+                              setNewPhotoUrl('');
+                              setNewPhotoTitle('');
+                              setActivePhotoFormId(null);
+                            }
+                          }}
+                        >
+                          Fotoğrafı Kaydet
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

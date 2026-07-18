@@ -374,6 +374,47 @@ const initialBlogs = [
 const initialActiveRepairs = [
   {
     id: 1,
+    plate: '74BT671',
+    model: 'Volkswagen POLO (2002)',
+    owner: 'İSMAİL ÇELİKTAŞ',
+    phone: '05533065274',
+    status: 'test',
+    baseCost: 5500,
+    jobsDone: [
+      { name: 'genel kontrol vires geçiyormu', cost: 5500 }
+    ],
+    customerDemands: 'genel kontrol vires geçiyormu',
+    extraItems: [],
+    pendingApproval: null,
+    deliveryTime: 'Bugün 17:30',
+    bayId: 'lift1',
+    assignedUsta: 'Kadir GÜL',
+    photos: [
+      { url: '/before_engine.png', title: 'Şanzıman & Vites Geçiş Kontrolü', category: 'Kabul / Teşhis', date: 'Bugün 10:15' },
+      { url: '/after_engine.png', title: 'Genel Alt Takım ve Mekanik Test', category: 'Onarım Aşaması', date: 'Bugün 14:30' }
+    ]
+  },
+  {
+    id: 2,
+    plate: '74DH422',
+    model: 'Volkswagen POLO (2015)',
+    owner: 'FURKAN KADİR ŞENOCAK',
+    phone: '05013301529',
+    status: 'kabul',
+    baseCost: 0,
+    jobsDone: [
+      { name: 'Ön amortisör 2 adet', cost: 0 }
+    ],
+    customerDemands: 'Ön amortisör 2 adet',
+    extraItems: [],
+    pendingApproval: null,
+    deliveryTime: 'Yarın 12:00',
+    bayId: 'lift1',
+    assignedUsta: 'Kadir GÜL',
+    photos: []
+  },
+  {
+    id: 3,
     plate: '74 VS 074',
     model: 'Volkswagen Golf 7 1.6 TDI (2017)',
     owner: 'Can Yılmaz',
@@ -388,43 +429,10 @@ const initialActiveRepairs = [
     pendingApproval: { item: 'Ön Fren Balataları', cost: 950 },
     deliveryTime: 'Bugün 17:30',
     bayId: 'lift3',
-    assignedUsta: 'Nuri Usta'
-  },
-  {
-    id: 2,
-    plate: '74 AS 321',
-    model: 'Skoda Octavia 1.6 TDI (2018)',
-    owner: 'Serkan Kaya',
-    phone: '0544 555 66 77',
-    status: 'ariza',
-    baseCost: 1200,
-    jobsDone: [
-      { name: 'ODIS Detaylı Tarama Yapıldı', cost: 800 },
-      { name: 'Enjektör geri dönüş hattı kaçak tespiti', cost: 400 }
-    ],
-    extraItems: [],
-    pendingApproval: null,
-    deliveryTime: 'Yarın 12:00',
-    bayId: 'electric',
-    assignedUsta: 'Selim Usta'
-  },
-  {
-    id: 3,
-    plate: '74 AB 567',
-    model: 'Audi A4 2.0 TDI (2020)',
-    owner: 'Merve Demir',
-    phone: '0535 888 77 66',
-    status: 'hazir',
-    baseCost: 1900,
-    jobsDone: [
-      { name: 'VAG Periyodik Bakım yapıldı', cost: 1500 },
-      { name: 'Silecek suyu ve antifriz tamamlandı', cost: 400 }
-    ],
-    extraItems: [{ name: 'Bosch Silecek Süpürgeleri', cost: 350 }],
-    pendingApproval: null,
-    deliveryTime: 'Teslime Hazır',
-    bayId: 'paint',
-    assignedUsta: 'Recai Usta'
+    assignedUsta: 'Nuri Usta',
+    photos: [
+      { url: '/before_engine.png', title: 'DSG Şanzıman Yağ Değişimi Öncesi', category: 'Kabul / Teşhis', date: 'Bugün 09:30' }
+    ]
   }
 ];
 
@@ -913,6 +921,42 @@ function App() {
     }
   };
 
+  const addRepairPhoto = async (id, photoObj) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        photos: [...(car.photos || []), photoObj] 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error("Firestore addRepairPhoto failed:", e);
+      }
+    }
+  };
+
+  const deleteRepairPhoto = async (id, photoIndex) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        photos: (car.photos || []).filter((_, idx) => idx !== photoIndex) 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error("Firestore deleteRepairPhoto failed:", e);
+      }
+    }
+  };
+
   const addPendingRequest = async (id, itemName, cost) => {
     const updated = activeRepairs.map(car => 
       String(car.id) === String(id) ? { ...car, pendingApproval: { item: itemName, cost: cost } } : car
@@ -1352,6 +1396,8 @@ function App() {
               updateRepairCustomTotalCost={updateRepairCustomTotalCost}
               updateRepairCustomPartsCost={updateRepairCustomPartsCost}
               updateRepairCustomerDemands={updateRepairCustomerDemands}
+              addRepairPhoto={addRepairPhoto}
+              deleteRepairPhoto={deleteRepairPhoto}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
               updateRepairBayAndUsta={updateRepairBayAndUsta}

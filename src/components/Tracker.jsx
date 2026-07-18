@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronRight, FileText, CheckCircle, AlertTriangle, Play, HelpCircle, Star, MessageCircle } from 'lucide-react';
+import { Search, ChevronRight, FileText, CheckCircle, AlertTriangle, Play, HelpCircle, Star, MessageCircle, Camera, Image, X } from 'lucide-react';
 
 export default function Tracker({ activeRepairs, updateRepairStatus, addExtraCostApproval, setTestimonials }) {
   const [plateQuery, setPlateQuery] = useState('');
@@ -10,6 +10,7 @@ export default function Tracker({ activeRepairs, updateRepairStatus, addExtraCos
   const [hoverRating, setHoverRating] = useState(0);
   const [commentText, setCommentText] = useState('');
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [selectedPhotoModal, setSelectedPhotoModal] = useState(null);
 
   const handleSubmitReview = () => {
     if (!commentText.trim() || !trackingCar) return;
@@ -192,6 +193,66 @@ export default function Tracker({ activeRepairs, updateRepairStatus, addExtraCos
                     </div>
                   )}
 
+                  {/* Aracın Servis Görselleri Galeri Bölümü */}
+                  <div className="detail-box glass" style={{ padding: '24px', borderRadius: '16px' }}>
+                    <h5 style={{ fontSize: '1.1rem', margin: '0 0 16px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Camera size={18} style={{ color: 'var(--primary)' }} />
+                      <span>Aracınızın Servis Fotoğrafları</span>
+                    </h5>
+
+                    {trackingCar.photos && trackingCar.photos.length > 0 ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
+                        {trackingCar.photos.map((photo, idx) => (
+                          <div 
+                            key={idx}
+                            onClick={() => setSelectedPhotoModal(photo)}
+                            style={{ 
+                              borderRadius: '12px', 
+                              overflow: 'hidden', 
+                              border: '1px solid var(--border-color)', 
+                              cursor: 'pointer',
+                              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                              background: 'rgba(0,0,0,0.4)',
+                              position: 'relative'
+                            }}
+                            className="photo-card-hover"
+                          >
+                            <div style={{ width: '100%', height: '100px', overflow: 'hidden' }}>
+                              <img 
+                                src={photo.url} 
+                                alt={photo.title || 'Servis Fotoğrafı'} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            </div>
+                            <div style={{ padding: '8px' }}>
+                              <span style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 'bold', background: 'rgba(6,182,212,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginBottom: '4px' }}>
+                                {photo.category || 'Servis'}
+                              </span>
+                              <h6 style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                {photo.title || 'Fotoğraf #' + (idx + 1)}
+                              </h6>
+                              {photo.date && (
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                                  {photo.date}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '20px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed var(--border-color)' }}>
+                        <Camera size={32} style={{ color: 'var(--text-muted)', marginBottom: '8px', opacity: 0.5 }} />
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                          Henüz bu araç için servis görseli yüklenmedi.
+                        </p>
+                        <small style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                          Ustalarımız onarım ve kontrol aşamalarında çektikleri fotoğrafları buraya yükleyecektir.
+                        </small>
+                      </div>
+                    )}
+                  </div>
+
                   {/* CUSTOMER REVIEW FORM - only when car is ready */}
                   {trackingCar.status === 'hazir' && (
                     <div className="customer-review-section no-print" style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(6, 182, 212, 0.01))', border: '1px dashed var(--primary)', borderRadius: '16px' }}>
@@ -284,6 +345,85 @@ export default function Tracker({ activeRepairs, updateRepairStatus, addExtraCos
             )}
           </div>
         )}
+
+        {/* Lightbox Modal for Photo View */}
+      {selectedPhotoModal && (
+        <div 
+          onClick={() => setSelectedPhotoModal(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            style={{
+              maxWidth: '700px',
+              width: '100%',
+              background: '#111827',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+              position: 'relative'
+            }}
+          >
+            <button
+              onClick={() => setSelectedPhotoModal(null)}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'rgba(0,0,0,0.6)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 2
+              }}
+            >
+              <X size={18} />
+            </button>
+
+            <div style={{ width: '100%', maxHeight: '450px', overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img 
+                src={selectedPhotoModal.url} 
+                alt={selectedPhotoModal.title} 
+                style={{ maxWidth: '100%', maxHeight: '450px', objectFit: 'contain' }}
+              />
+            </div>
+
+            <div style={{ padding: '16px 20px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold', background: 'rgba(6,182,212,0.15)', padding: '3px 8px', borderRadius: '4px' }}>
+                {selectedPhotoModal.category || 'Servis Görseli'}
+              </span>
+              <h4 style={{ margin: '8px 0 4px', fontSize: '1.1rem', color: '#fff' }}>
+                {selectedPhotoModal.title}
+              </h4>
+              {selectedPhotoModal.date && (
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Tarih / Saat: {selectedPhotoModal.date}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </section>
   );
