@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Search, Award, Users, CheckCircle, Clock, Zap, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { Calendar, Search, Award, Users, CheckCircle, Clock, Zap, ArrowRight, Check, Sparkles, Shield } from 'lucide-react';
 import CountUp from './CountUp';
 
 const vagModels = [
