@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { 
   Calendar, Wrench, Plus, Check, X, Shield, PlusCircle, Trash, Search, 
   DollarSign, Package, Edit3, UserPlus, Image, MessageSquare, Settings2,
-  Share2, FileText, Clock, Sparkles, Gift, CreditCard, ClipboardList
+  Share2, FileText, Clock, Sparkles, Gift, CreditCard, ClipboardList,
+  Download, Upload, HardDrive, AlertTriangle, CheckCircle
 } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, writeBatch } from 'firebase/firestore';
 
 export default function UstaDashboard({ 
   appointments, 
@@ -59,7 +62,16 @@ export default function UstaDashboard({
   addBlogPost,
   deleteBlogPost
 }) {
-  const [subTab, setSubTab] = useState('repairs'); // repairs, appointments, listings, history, cms, hours, jobTracker
+  const [subTab, setSubTab] = useState('repairs'); // repairs, appointments, listings, history, cms, hours, jobTracker, backup
+
+  // Backup States
+  const [backupStatus, setBackupStatus] = useState(null); // null, 'loading', 'success', 'error'
+  const [backupMessage, setBackupMessage] = useState('');
+  const [restoreStatus, setRestoreStatus] = useState(null);
+  const [restoreMessage, setRestoreMessage] = useState('');
+  const [lastBackupDate, setLastBackupDate] = useState(() => localStorage.getItem('vos74_last_backup') || null);
+  const [restoreConfirm, setRestoreConfirm] = useState(false);
+  const [pendingRestoreData, setPendingRestoreData] = useState(null);
   const [newHourInput, setNewHourInput] = useState('');
   const [includeWarrantyNote, setIncludeWarrantyNote] = useState(false);
   const [cmsSection, setCmsSection] = useState('headers'); // headers, team, testimonials, gallery
@@ -118,6 +130,26 @@ export default function UstaDashboard({
       setNewRepairUsta(team[0].name);
     }
   }, [team]);
+
+  const handleRestoreFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Geçersiz JSON formatı');
+        }
+        setPendingRestoreData(parsed);
+        setRestoreStatus(null);
+        setRestoreMessage('');
+      } catch (err) {
+        setRestoreStatus('error');
+        setRestoreMessage('Yedek dosyası okunamadı: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleCreateActiveRepair = (e) => {
     e.preventDefault();
@@ -685,6 +717,15 @@ _Vos74 VAG Grubu Özel Servis_`;
         >
           <ClipboardList size={16} />
           <span>İş Takip & Finans</span>
+        </button>
+
+        <button 
+          className={`dash-subtab-btn ${subTab === 'backup' ? 'active' : ''}`}
+          onClick={() => setSubTab('backup')}
+          style={{ borderLeft: '1px dashed var(--primary)' }}
+        >
+          <HardDrive size={16} />
+          <span>Yedekleme</span>
         </button>
 
         <button 
@@ -3151,6 +3192,281 @@ _Vos74 VAG Grubu Özel Servis_`;
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB: BACKUP & RESTORE (YEDEKLEME) */}
+      {subTab === 'backup' && (
+        <div className="backup-tab-layout animate-slide-up" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(6, 182, 212, 0.1)', border: '1px solid rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <HardDrive size={24} className="text-gradient" />
+            </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '1.25rem' }}>Veri Yedekleme & Geri Yükleme</h4>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Tüm servis kayıtlarınızı JSON dosyası olarak yedekleyin veya önceki yedeğinizden geri yükleyin.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+            
+            {/* EXPORT / BACKUP Card */}
+            <div className="glass-card" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Download size={22} style={{ color: '#22c55e' }} />
+                <h5 style={{ margin: 0, fontSize: '1.1rem' }}>Yedek Al (Dışa Aktar)</h5>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                Tüm veritabanınızı (randevular, aktif/tamamlanmış onarımlar, ilanlar, blog yazıları, müşteri kartları ve site ayarları) tek bir JSON dosyasına indirin.
+              </p>
+
+              {lastBackupDate && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.15)', borderRadius: '8px' }}>
+                  <CheckCircle size={16} style={{ color: '#22c55e', flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Son yedek: <strong style={{ color: '#22c55e' }}>{lastBackupDate}</strong></span>
+                </div>
+              )}
+
+              {backupStatus === 'success' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '8px' }}>
+                  <CheckCircle size={16} style={{ color: '#22c55e' }} />
+                  <span style={{ fontSize: '0.85rem', color: '#22c55e', fontWeight: 'bold' }}>{backupMessage}</span>
+                </div>
+              )}
+              {backupStatus === 'error' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
+                  <AlertTriangle size={16} style={{ color: '#ef4444' }} />
+                  <span style={{ fontSize: '0.85rem', color: '#ef4444' }}>{backupMessage}</span>
+                </div>
+              )}
+
+              <button
+                className="glow-btn"
+                disabled={backupStatus === 'loading'}
+                style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '0.95rem', fontWeight: 'bold', marginTop: 'auto', opacity: backupStatus === 'loading' ? 0.6 : 1 }}
+                onClick={async () => {
+                  setBackupStatus('loading');
+                  setBackupMessage('Veriler toplanıyor...');
+                  try {
+                    const collectionsToBackup = ['appointments', 'activeRepairs', 'completedRepairs', 'listings', 'blogs', 'customerCards'];
+                    const backupData = { _meta: { version: '1.0', createdAt: new Date().toISOString(), source: 'vos74.com.tr' } };
+
+                    // Fetch settings
+                    const settingsSnap = await getDoc(doc(db, 'settings', 'general'));
+                    backupData.settings = settingsSnap.exists() ? settingsSnap.data() : {};
+
+                    // Fetch collections
+                    for (const colName of collectionsToBackup) {
+                      const snap = await getDocs(collection(db, colName));
+                      backupData[colName] = snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+                    }
+
+                    // Create and download file
+                    const jsonStr = JSON.stringify(backupData, null, 2);
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const dateStr = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
+                    const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }).replace(':', '-');
+                    a.href = url;
+                    a.download = `vos74_yedek_${dateStr}_${timeStr}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    const now = new Date().toLocaleString('tr-TR');
+                    localStorage.setItem('vos74_last_backup', now);
+                    setLastBackupDate(now);
+                    setBackupStatus('success');
+                    setBackupMessage('Yedek başarıyla indirildi!');
+                    setTimeout(() => setBackupStatus(null), 5000);
+                  } catch (err) {
+                    console.error('Backup failed:', err);
+                    setBackupStatus('error');
+                    setBackupMessage('Yedek alınırken hata oluştu: ' + err.message);
+                  }
+                }}
+              >
+                {backupStatus === 'loading' ? (
+                  <><span className="spinner" style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }}></span> Yedek Alınıyor...</>
+                ) : (
+                  <><Download size={18} /> Yedek Al & İndir</>
+                )}
+              </button>
+            </div>
+
+            {/* IMPORT / RESTORE Card */}
+            <div className="glass-card" style={{ padding: '28px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Upload size={22} style={{ color: 'var(--accent)' }} />
+                <h5 style={{ margin: 0, fontSize: '1.1rem' }}>Geri Yükle (İçe Aktar)</h5>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                Daha önce indirdiğiniz bir yedek dosyasından (.json) tüm verilerinizi geri yükleyin.
+              </p>
+
+              <div style={{ padding: '16px', border: '2px dashed var(--border-color)', borderRadius: '12px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'border-color 0.3s' }}
+                onClick={() => document.getElementById('backup-file-input')?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                onDragLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleRestoreFile(file);
+                }}
+              >
+                <Upload size={32} style={{ color: 'var(--text-muted)', marginBottom: '8px' }} />
+                <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Dosya Seçin veya Sürükleyip Bırakın</p>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>.json formatında yedek dosyası</p>
+                <input
+                  id="backup-file-input"
+                  type="file"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) handleRestoreFile(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+
+              {pendingRestoreData && !restoreConfirm && (
+                <div style={{ padding: '14px', background: 'rgba(6, 182, 212, 0.05)', border: '1px solid rgba(6, 182, 212, 0.15)', borderRadius: '10px' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>📄 Yedek Dosyası Yüklendi</p>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <span>Tarih: {pendingRestoreData._meta?.createdAt ? new Date(pendingRestoreData._meta.createdAt).toLocaleString('tr-TR') : 'Bilinmiyor'}</span>
+                    <span>Randevular: {pendingRestoreData.appointments?.length || 0}</span>
+                    <span>Aktif Onarımlar: {pendingRestoreData.activeRepairs?.length || 0}</span>
+                    <span>Tamamlanan Onarımlar: {pendingRestoreData.completedRepairs?.length || 0}</span>
+                    <span>İlanlar: {pendingRestoreData.listings?.length || 0}</span>
+                    <span>Blog Yazıları: {pendingRestoreData.blogs?.length || 0}</span>
+                    <span>Müşteri Kartları: {pendingRestoreData.customerCards?.length || 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+                    <button
+                      className="glow-btn"
+                      style={{ flex: 1, justifyContent: 'center', padding: '10px', fontSize: '0.85rem', fontWeight: 'bold', background: '#ef4444', boxShadow: '0 4px 15px rgba(239,68,68,0.2)' }}
+                      onClick={() => setRestoreConfirm(true)}
+                    >
+                      <AlertTriangle size={16} /> Geri Yükle
+                    </button>
+                    <button
+                      className="glow-btn-secondary"
+                      style={{ flex: 1, justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}
+                      onClick={() => { setPendingRestoreData(null); setRestoreMessage(''); setRestoreStatus(null); }}
+                    >
+                      İptal
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Confirmation Dialog */}
+              {restoreConfirm && (
+                <div style={{ padding: '18px', background: 'rgba(239, 68, 68, 0.08)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                    <AlertTriangle size={20} style={{ color: '#ef4444' }} />
+                    <strong style={{ color: '#ef4444', fontSize: '0.95rem' }}>DİKKAT!</strong>
+                  </div>
+                  <p style={{ margin: '0 0 14px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    Bu işlem mevcut tüm verilerin üzerine yazacaktır. Geri alınamaz! Devam etmek istediğinizden emin misiniz?
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      className="glow-btn"
+                      disabled={restoreStatus === 'loading'}
+                      style={{ flex: 1, justifyContent: 'center', padding: '10px', fontSize: '0.85rem', fontWeight: 'bold', background: '#ef4444', opacity: restoreStatus === 'loading' ? 0.6 : 1 }}
+                      onClick={async () => {
+                        if (!pendingRestoreData) return;
+                        setRestoreStatus('loading');
+                        setRestoreMessage('Veriler geri yükleniyor...');
+                        try {
+                          const data = pendingRestoreData;
+
+                          // Restore settings
+                          if (data.settings) {
+                            await setDoc(doc(db, 'settings', 'general'), data.settings);
+                          }
+
+                          // Restore collections
+                          const collectionsToRestore = ['appointments', 'activeRepairs', 'completedRepairs', 'listings', 'blogs', 'customerCards'];
+                          for (const colName of collectionsToRestore) {
+                            if (!data[colName]) continue;
+
+                            // Delete existing docs
+                            const existingSnap = await getDocs(collection(db, colName));
+                            for (const existingDoc of existingSnap.docs) {
+                              await deleteDoc(existingDoc.ref);
+                            }
+
+                            // Write backup docs
+                            for (const item of data[colName]) {
+                              const docId = item._docId || String(item.id || Date.now() + Math.random());
+                              const { _docId, ...cleanItem } = item;
+                              await setDoc(doc(db, colName, docId), cleanItem);
+                            }
+                          }
+
+                          setRestoreStatus('success');
+                          setRestoreMessage('Veriler başarıyla geri yüklendi! Sayfa yenileniyor...');
+                          setRestoreConfirm(false);
+                          setPendingRestoreData(null);
+                          setTimeout(() => window.location.reload(), 2000);
+                        } catch (err) {
+                          console.error('Restore failed:', err);
+                          setRestoreStatus('error');
+                          setRestoreMessage('Geri yükleme sırasında hata oluştu: ' + err.message);
+                          setRestoreConfirm(false);
+                        }
+                      }}
+                    >
+                      {restoreStatus === 'loading' ? 'Yükleniyor...' : 'Evet, Geri Yükle'}
+                    </button>
+                    <button
+                      className="glow-btn-secondary"
+                      style={{ flex: 1, justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}
+                      onClick={() => { setRestoreConfirm(false); }}
+                    >
+                      Vazgeç
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {restoreStatus === 'success' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '8px' }}>
+                  <CheckCircle size={16} style={{ color: '#22c55e' }} />
+                  <span style={{ fontSize: '0.85rem', color: '#22c55e', fontWeight: 'bold' }}>{restoreMessage}</span>
+                </div>
+              )}
+              {restoreStatus === 'error' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
+                  <AlertTriangle size={16} style={{ color: '#ef4444' }} />
+                  <span style={{ fontSize: '0.85rem', color: '#ef4444' }}>{restoreMessage}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tips Section */}
+          <div style={{ padding: '18px 22px', background: 'rgba(6, 182, 212, 0.03)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+            <h6 style={{ margin: '0 0 10px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Shield size={16} className="text-gradient" /> Yedekleme İpuçları
+            </h6>
+            <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.8, listStyleType: 'disc' }}>
+              <li>Verilerinizi <strong>günlük</strong> olarak yedeklemenizi öneriyoruz.</li>
+              <li>Yedek dosyasını bilgisayarınızda güvenli bir klasörde ve/veya USB belleğe kaydedin.</li>
+              <li>Geri yükleme işlemi mevcut verilerin <strong>üzerine</strong> yazar. Önce mevcut verilerinizi ayrı yedekleyin.</li>
+              <li>Yedek dosyasını düzenlemeyin, bozulabilir.</li>
+            </ul>
           </div>
         </div>
       )}
