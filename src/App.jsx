@@ -859,6 +859,24 @@ function App() {
     }
   };
 
+  const updateRepairCustomTotalCost = async (id, newCustomTotalCost) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        customTotalCost: newCustomTotalCost !== '' ? Number(newCustomTotalCost) : '' 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const updateRepairCustomerDemands = async (id, demands) => {
     const updated = activeRepairs.map(car => 
       String(car.id) === String(id) ? { 
@@ -921,7 +939,10 @@ function App() {
     const jobsTotal = targetCar.jobsDone ? targetCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
     const extraTotal = targetCar.extraItems ? targetCar.extraItems.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
     const laborTotal = targetCar.laborCost || 0;
-    const totalCost = jobsTotal + extraTotal + laborTotal;
+    const computedTotal = jobsTotal + extraTotal + laborTotal;
+    const totalCost = (targetCar.customTotalCost !== undefined && targetCar.customTotalCost !== '' && Number(targetCar.customTotalCost) > 0)
+      ? Number(targetCar.customTotalCost)
+      : computedTotal;
 
     const historyRecord = {
       plate: targetCar.plate,
@@ -947,7 +968,8 @@ function App() {
       deliveryTime: targetCar.deliveryTime || '',
       jobsDone: targetCar.jobsDone || [],
       extraItems: targetCar.extraItems || [],
-      laborCost: targetCar.laborCost || 0
+      laborCost: targetCar.laborCost || 0,
+      customTotalCost: targetCar.customTotalCost !== undefined ? targetCar.customTotalCost : ''
     };
 
     setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));
@@ -1308,6 +1330,7 @@ function App() {
               deleteRepairJob={deleteRepairJob}
               updateRepairJobCost={updateRepairJobCost}
               updateRepairLaborCost={updateRepairLaborCost}
+              updateRepairCustomTotalCost={updateRepairCustomTotalCost}
               updateRepairCustomerDemands={updateRepairCustomerDemands}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}
