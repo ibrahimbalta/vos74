@@ -18,6 +18,7 @@ export default function UstaDashboard({
   activeRepairs, 
   completedRepairs,
   completeRepairJob,
+  deleteCompletedRepair,
   updateRepairStatus, 
   addRepairJob, 
   deleteRepairJob,
@@ -1558,23 +1559,42 @@ _Vos74 VAG Grubu Özel Servis_`;
                             </td>
                             <td style={{ padding: '12px 10px', color: 'var(--text-secondary)' }}>{record.master}</td>
                             <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                              <button
-                                type="button"
-                                className="glow-btn"
-                                style={{ padding: '5px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                                onClick={() => {
-                                  const buildReceiptCar = (record, fallbackPlate, fallbackModel) => {
-                                    let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
-                                      ? record.jobsDone
-                                      : record.desc
-                                        ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
-                                        : [];
+                              <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  className="glow-btn"
+                                  style={{ padding: '5px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                  onClick={() => {
+                                    const buildReceiptCar = (record, fallbackPlate, fallbackModel) => {
+                                      let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
+                                        ? record.jobsDone
+                                        : record.desc
+                                          ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
+                                          : [];
 
-                                    // Fix 0 TL prices: if all jobsDone costs are 0 but record.cost > 0,
-                                    // distribute record.cost evenly or assign to first item
-                                    const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
-                                    if (allZero && record.cost && record.cost > 0 && (record.laborCost || 0) === 0) {
-                                      // Put full cost as labor since we can't split per-item
+                                      const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
+                                      if (allZero && record.cost && record.cost > 0 && (record.laborCost || 0) === 0) {
+                                        return {
+                                          ...record,
+                                          plate: record.plate || fallbackPlate,
+                                          model: record.model || fallbackModel,
+                                          owner: record.owner || '',
+                                          phone: record.phone || '',
+                                          km: record.km || '',
+                                          chassis: record.chassis || '',
+                                          motorNo: record.motorNo || '',
+                                          broughtBy: record.broughtBy || '',
+                                          advisor: record.advisor || '',
+                                          assignedUsta: record.assignedUsta || record.master || '',
+                                          customerDemands: record.customerDemands || '',
+                                          deliveryTime: record.date || '',
+                                          jobsDone: finalJobsDone,
+                                          extraItems: record.extraItems || [],
+                                          laborCost: record.cost,
+                                          id: record.id || (idx + 1)
+                                        };
+                                      }
+
                                       return {
                                         ...record,
                                         plate: record.plate || fallbackPlate,
@@ -1591,36 +1611,40 @@ _Vos74 VAG Grubu Özel Servis_`;
                                         deliveryTime: record.date || '',
                                         jobsDone: finalJobsDone,
                                         extraItems: record.extraItems || [],
-                                        laborCost: record.cost,
+                                        laborCost: record.laborCost || 0,
                                         id: record.id || (idx + 1)
                                       };
-                                    }
-
-                                    return {
-                                      ...record,
-                                      plate: record.plate || fallbackPlate,
-                                      model: record.model || fallbackModel,
-                                      owner: record.owner || '',
-                                      phone: record.phone || '',
-                                      km: record.km || '',
-                                      chassis: record.chassis || '',
-                                      motorNo: record.motorNo || '',
-                                      broughtBy: record.broughtBy || '',
-                                      advisor: record.advisor || '',
-                                      assignedUsta: record.assignedUsta || record.master || '',
-                                      customerDemands: record.customerDemands || '',
-                                      deliveryTime: record.date || '',
-                                      jobsDone: finalJobsDone,
-                                      extraItems: record.extraItems || [],
-                                      laborCost: record.laborCost || 0,
-                                      id: record.id || (idx + 1)
                                     };
-                                  };
-                                  setPrintingCar(buildReceiptCar(record, record.plate, record.model));
-                                }}
-                              >
-                                <FileText size={14} /> Servis Fişi
-                              </button>
+                                    setPrintingCar(buildReceiptCar(record, record.plate, record.model));
+                                  }}
+                                >
+                                  <FileText size={14} /> Servis Fişi
+                                </button>
+                                <button
+                                  type="button"
+                                  className="glow-btn-danger"
+                                  style={{
+                                    padding: '5px 10px',
+                                    fontSize: '0.75rem',
+                                    background: '#ef4444',
+                                    border: 'none',
+                                    color: '#fff',
+                                    borderRadius: '6px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Geçmiş Kaydını Sil"
+                                  onClick={() => {
+                                    if (window.confirm(`${record.plate} plakalı ${record.date} tarihli servis kaydını silmek istediğinize emin misiniz?`)) {
+                                      deleteCompletedRepair && deleteCompletedRepair(record);
+                                    }
+                                  }}
+                                >
+                                  <Trash size={14} /> Sil
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1649,48 +1673,80 @@ _Vos74 VAG Grubu Özel Servis_`;
                   {historyResult.history.map((record, idx) => (
                     <div key={idx} className="history-timeline-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                       <p style={{ flex: 1, margin: 0 }}>📅 {record.date} | 💰 {record.cost} TL - {record.desc} (Usta: {record.master})</p>
-                      <button
-                        type="button"
-                        className="glow-btn"
-                        style={{ padding: '6px 14px', fontSize: '0.78rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                        onClick={() => {
-                          let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
-                            ? record.jobsDone
-                            : record.desc
-                              ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
-                              : [];
+                      <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          className="glow-btn"
+                          style={{ padding: '6px 14px', fontSize: '0.78rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                          onClick={() => {
+                            let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
+                              ? record.jobsDone
+                              : record.desc
+                                ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
+                                : [];
 
-                          // Fix 0 TL prices for legacy records
-                          const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
-                          let fixedLaborCost = record.laborCost || 0;
-                          if (allZero && record.cost && record.cost > 0 && fixedLaborCost === 0) {
-                            fixedLaborCost = record.cost;
-                          }
+                            const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
+                            let fixedLaborCost = record.laborCost || 0;
+                            if (allZero && record.cost && record.cost > 0 && fixedLaborCost === 0) {
+                              fixedLaborCost = record.cost;
+                            }
 
-                          const receiptCar = {
-                            ...record,
-                            plate: record.plate || historyResult.plate,
-                            model: record.model || historyResult.model,
-                            owner: record.owner || '',
-                            phone: record.phone || '',
-                            km: record.km || '',
-                            chassis: record.chassis || '',
-                            motorNo: record.motorNo || '',
-                            broughtBy: record.broughtBy || '',
-                            advisor: record.advisor || '',
-                            assignedUsta: record.assignedUsta || record.master || '',
-                            customerDemands: record.customerDemands || '',
-                            deliveryTime: record.date || '',
-                            jobsDone: finalJobsDone,
-                            extraItems: record.extraItems || [],
-                            laborCost: fixedLaborCost,
-                            id: record.id || (idx + 1)
-                          };
-                          setPrintingCar(receiptCar);
-                        }}
-                      >
-                        <FileText size={14} /> Servis Fişi
-                      </button>
+                            const receiptCar = {
+                              ...record,
+                              plate: record.plate || historyResult.plate,
+                              model: record.model || historyResult.model,
+                              owner: record.owner || '',
+                              phone: record.phone || '',
+                              km: record.km || '',
+                              chassis: record.chassis || '',
+                              motorNo: record.motorNo || '',
+                              broughtBy: record.broughtBy || '',
+                              advisor: record.advisor || '',
+                              assignedUsta: record.assignedUsta || record.master || '',
+                              customerDemands: record.customerDemands || '',
+                              deliveryTime: record.date || '',
+                              jobsDone: finalJobsDone,
+                              extraItems: record.extraItems || [],
+                              laborCost: fixedLaborCost,
+                              id: record.id || (idx + 1)
+                            };
+                            setPrintingCar(receiptCar);
+                          }}
+                        >
+                          <FileText size={14} /> Servis Fişi
+                        </button>
+                        <button
+                          type="button"
+                          className="glow-btn-danger"
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '0.78rem',
+                            background: '#ef4444',
+                            border: 'none',
+                            color: '#fff',
+                            borderRadius: '6px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            cursor: 'pointer'
+                          }}
+                          title="Geçmiş Kaydını Sil"
+                          onClick={() => {
+                            if (window.confirm(`${record.plate} plakalı ${record.date} tarihli servis kaydını silmek istediğinize emin misiniz?`)) {
+                              deleteCompletedRepair && deleteCompletedRepair(record);
+                              const updatedHist = historyResult.history.filter(item => item !== record);
+                              if (updatedHist.length > 0) {
+                                setHistoryResult({ ...historyResult, history: updatedHist });
+                              } else {
+                                setHistoryResult('notfound');
+                              }
+                            }
+                          }}
+                        >
+                          <Trash size={14} /> Sil
+                        </button>
+                      </div>
+                    </div>
                     </div>
                   ))}
                 </div>

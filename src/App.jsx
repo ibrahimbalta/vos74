@@ -550,7 +550,7 @@ function App() {
         // Fetch dynamic lists
         const fetchCol = async (colName) => {
           const snap = await getDocs(collection(db, colName));
-          return snap.docs.map(doc => doc.data());
+          return snap.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
         };
 
         const apts = await fetchCol("appointments");
@@ -951,14 +951,40 @@ function App() {
     };
 
     setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));
-    setCompletedRepairs([historyRecord, ...completedRepairs]);
-    alert(`${targetCar.plate} plakalı aracın işlemleri tamamlandı ve müşteri geçmişine kaydedildi.`);
-
+    
     try {
       await deleteDoc(doc(db, "activeRepairs", String(id)));
-      await addDoc(collection(db, "completedRepairs"), historyRecord);
+      const docRef = await addDoc(collection(db, "completedRepairs"), historyRecord);
+      historyRecord._docId = docRef.id;
     } catch (e) {
       console.error(e);
+    }
+
+    setCompletedRepairs([historyRecord, ...completedRepairs]);
+    alert(`${targetCar.plate} plakalı aracın işlemleri tamamlandı ve müşteri geçmişine kaydedildi.`);
+  };
+
+  const deleteCompletedRepair = async (targetRecord) => {
+    setCompletedRepairs(prev => prev.filter(item => item !== targetRecord));
+
+    try {
+      if (targetRecord._docId) {
+        await deleteDoc(doc(db, "completedRepairs", targetRecord._docId));
+      } else {
+        const snap = await getDocs(collection(db, "completedRepairs"));
+        for (const d of snap.docs) {
+          const data = d.data();
+          if (
+            (targetRecord.id && data.id === targetRecord.id) ||
+            (data.plate === targetRecord.plate && data.date === targetRecord.date && data.desc === targetRecord.desc)
+          ) {
+            await deleteDoc(d.ref);
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("deleteCompletedRepair failed:", e);
     }
   };
 
@@ -1276,6 +1302,7 @@ function App() {
               activeRepairs={activeRepairs}
               completedRepairs={completedRepairs}
               completeRepairJob={completeRepairJob}
+              deleteCompletedRepair={deleteCompletedRepair}
               updateRepairStatus={updateRepairStatus}
               addRepairJob={addRepairJob}
               deleteRepairJob={deleteRepairJob}
