@@ -1747,7 +1747,6 @@ _Vos74 VAG Grubu Özel Servis_`;
                         </button>
                       </div>
                     </div>
-                    </div>
                   ))}
                 </div>
               </div>
