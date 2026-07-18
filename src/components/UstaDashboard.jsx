@@ -180,6 +180,9 @@ export default function UstaDashboard({
   // State for Plate Search History
   const [searchPlate, setSearchPlate] = useState('');
   const [historyResult, setHistoryResult] = useState(null);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const [historyDateFrom, setHistoryDateFrom] = useState('');
+  const [historyDateTo, setHistoryDateTo] = useState('');
 
   // --- CMS FORMS STATES ---
   // 1. Branch Headers & Services State
@@ -1387,6 +1390,215 @@ _Vos74 VAG Grubu Özel Servis_`;
             </div>
           </form>
 
+          {/* Toggle: Show All History */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className={showAllHistory ? 'glow-btn' : 'glow-btn-secondary'}
+              style={{ padding: '8px 18px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => {
+                setShowAllHistory(!showAllHistory);
+                if (!showAllHistory) setHistoryResult(null);
+              }}
+            >
+              <ClipboardList size={16} />
+              <span>{showAllHistory ? 'Listeyi Gizle' : 'Tüm Geçmişi Listele'}</span>
+            </button>
+          </div>
+
+          {/* Date Range Filter - only visible when showAllHistory */}
+          {showAllHistory && (
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginTop: '14px', flexWrap: 'wrap', padding: '14px 18px', background: 'rgba(6, 182, 212, 0.04)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '0.78rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Başlangıç Tarihi</label>
+                <input 
+                  type="date" 
+                  value={historyDateFrom}
+                  onChange={(e) => setHistoryDateFrom(e.target.value)}
+                  style={{ padding: '7px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '0.78rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Bitiş Tarihi</label>
+                <input 
+                  type="date" 
+                  value={historyDateTo}
+                  onChange={(e) => setHistoryDateTo(e.target.value)}
+                  style={{ padding: '7px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                />
+              </div>
+              {(historyDateFrom || historyDateTo) && (
+                <button
+                  type="button"
+                  className="glow-btn-secondary"
+                  style={{ padding: '7px 14px', fontSize: '0.8rem' }}
+                  onClick={() => { setHistoryDateFrom(''); setHistoryDateTo(''); }}
+                >
+                  <X size={14} /> Filtreyi Temizle
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* All History List */}
+          {showAllHistory && (() => {
+            // Parse Turkish date format (DD.MM.YYYY) to Date object
+            const parseTRDate = (dateStr) => {
+              if (!dateStr) return null;
+              const parts = dateStr.split('.');
+              if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+              }
+              return null;
+            };
+
+            let filteredRecords = completedRepairs ? [...completedRepairs] : [];
+
+            // Apply date range filter
+            if (historyDateFrom || historyDateTo) {
+              const fromDate = historyDateFrom ? new Date(historyDateFrom) : null;
+              const toDate = historyDateTo ? new Date(historyDateTo) : null;
+              if (toDate) toDate.setHours(23, 59, 59, 999);
+
+              filteredRecords = filteredRecords.filter(record => {
+                const recordDate = parseTRDate(record.date);
+                if (!recordDate) return true;
+                if (fromDate && recordDate < fromDate) return false;
+                if (toDate && recordDate > toDate) return false;
+                return true;
+              });
+            }
+
+            // Sort by date descending (newest first)
+            filteredRecords.sort((a, b) => {
+              const dateA = parseTRDate(a.date);
+              const dateB = parseTRDate(b.date);
+              if (!dateA || !dateB) return 0;
+              return dateB - dateA;
+            });
+
+            return (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h5 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                    Toplam {filteredRecords.length} Kayıt
+                    {(historyDateFrom || historyDateTo) && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}> (filtrelenmiş)</span>}
+                  </h5>
+                </div>
+                {filteredRecords.length > 0 ? (
+                  <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                          <th style={{ padding: '10px' }}>Tarih</th>
+                          <th style={{ padding: '10px' }}>Plaka</th>
+                          <th style={{ padding: '10px' }}>Araç</th>
+                          <th style={{ padding: '10px' }}>Yapılan İşlemler</th>
+                          <th style={{ padding: '10px', textAlign: 'right' }}>Tutar</th>
+                          <th style={{ padding: '10px' }}>Usta</th>
+                          <th style={{ padding: '10px', textAlign: 'center' }}>İşlem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredRecords.map((record, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem', transition: 'background 0.2s' }} className="table-row-hover">
+                            <td style={{ padding: '12px 10px', whiteSpace: 'nowrap' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>📅 {record.date}</span>
+                            </td>
+                            <td style={{ padding: '12px 10px' }}>
+                              <span className="plate-badge" style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>{record.plate}</span>
+                            </td>
+                            <td style={{ padding: '12px 10px', color: 'var(--text-secondary)' }}>{record.model}</td>
+                            <td style={{ padding: '12px 10px', maxWidth: '300px', lineHeight: '1.4' }}>
+                              <span style={{ fontSize: '0.82rem' }}>{record.desc}</span>
+                            </td>
+                            <td style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                              <span style={{ color: record.cost > 0 ? '#22c55e' : 'var(--text-muted)' }}>{(record.cost || 0).toLocaleString('tr-TR')} TL</span>
+                            </td>
+                            <td style={{ padding: '12px 10px', color: 'var(--text-secondary)' }}>{record.master}</td>
+                            <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                className="glow-btn"
+                                style={{ padding: '5px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                onClick={() => {
+                                  const buildReceiptCar = (record, fallbackPlate, fallbackModel) => {
+                                    let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
+                                      ? record.jobsDone
+                                      : record.desc
+                                        ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
+                                        : [];
+
+                                    // Fix 0 TL prices: if all jobsDone costs are 0 but record.cost > 0,
+                                    // distribute record.cost evenly or assign to first item
+                                    const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
+                                    if (allZero && record.cost && record.cost > 0 && (record.laborCost || 0) === 0) {
+                                      // Put full cost as labor since we can't split per-item
+                                      return {
+                                        ...record,
+                                        plate: record.plate || fallbackPlate,
+                                        model: record.model || fallbackModel,
+                                        owner: record.owner || '',
+                                        phone: record.phone || '',
+                                        km: record.km || '',
+                                        chassis: record.chassis || '',
+                                        motorNo: record.motorNo || '',
+                                        broughtBy: record.broughtBy || '',
+                                        advisor: record.advisor || '',
+                                        assignedUsta: record.assignedUsta || record.master || '',
+                                        customerDemands: record.customerDemands || '',
+                                        deliveryTime: record.date || '',
+                                        jobsDone: finalJobsDone,
+                                        extraItems: record.extraItems || [],
+                                        laborCost: record.cost,
+                                        id: record.id || (idx + 1)
+                                      };
+                                    }
+
+                                    return {
+                                      ...record,
+                                      plate: record.plate || fallbackPlate,
+                                      model: record.model || fallbackModel,
+                                      owner: record.owner || '',
+                                      phone: record.phone || '',
+                                      km: record.km || '',
+                                      chassis: record.chassis || '',
+                                      motorNo: record.motorNo || '',
+                                      broughtBy: record.broughtBy || '',
+                                      advisor: record.advisor || '',
+                                      assignedUsta: record.assignedUsta || record.master || '',
+                                      customerDemands: record.customerDemands || '',
+                                      deliveryTime: record.date || '',
+                                      jobsDone: finalJobsDone,
+                                      extraItems: record.extraItems || [],
+                                      laborCost: record.laborCost || 0,
+                                      id: record.id || (idx + 1)
+                                    };
+                                  };
+                                  setPrintingCar(buildReceiptCar(record, record.plate, record.model));
+                                }}
+                              >
+                                <FileText size={14} /> Servis Fişi
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)' }}>
+                    <ClipboardList size={36} className="muted-icon" style={{ marginBottom: '12px', opacity: 0.4 }} />
+                    <p style={{ fontSize: '0.9rem' }}>
+                      {(historyDateFrom || historyDateTo) ? 'Seçili tarih aralığında kayıt bulunamadı.' : 'Henüz tamamlanmış servis kaydı bulunmamaktadır.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Search Results (plaka araması) */}
           <div className="history-results-area">
             {historyResult === 'notfound' && <p>Sonuç bulunamadı.</p>}
             {historyResult && historyResult !== 'notfound' && (
@@ -1401,8 +1613,19 @@ _Vos74 VAG Grubu Özel Servis_`;
                         className="glow-btn"
                         style={{ padding: '6px 14px', fontSize: '0.78rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         onClick={() => {
-                          // If record has full detail data (jobsDone), use directly
-                          // Otherwise build a minimal structure from desc for legacy records
+                          let finalJobsDone = record.jobsDone && record.jobsDone.length > 0
+                            ? record.jobsDone
+                            : record.desc
+                              ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
+                              : [];
+
+                          // Fix 0 TL prices for legacy records
+                          const allZero = finalJobsDone.length > 0 && finalJobsDone.every(j => !j.cost || j.cost === 0);
+                          let fixedLaborCost = record.laborCost || 0;
+                          if (allZero && record.cost && record.cost > 0 && fixedLaborCost === 0) {
+                            fixedLaborCost = record.cost;
+                          }
+
                           const receiptCar = {
                             ...record,
                             plate: record.plate || historyResult.plate,
@@ -1417,13 +1640,9 @@ _Vos74 VAG Grubu Özel Servis_`;
                             assignedUsta: record.assignedUsta || record.master || '',
                             customerDemands: record.customerDemands || '',
                             deliveryTime: record.date || '',
-                            jobsDone: record.jobsDone && record.jobsDone.length > 0
-                              ? record.jobsDone
-                              : record.desc
-                                ? record.desc.split(', ').map(name => ({ name, cost: 0 }))
-                                : [],
+                            jobsDone: finalJobsDone,
                             extraItems: record.extraItems || [],
-                            laborCost: record.laborCost || 0,
+                            laborCost: fixedLaborCost,
                             id: record.id || (idx + 1)
                           };
                           setPrintingCar(receiptCar);
