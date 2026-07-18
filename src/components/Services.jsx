@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, ChevronRight, Activity, Cpu, Hammer, ShieldAlert, Check } from 'lucide-react';
+import { Calendar, ChevronRight, Activity, Cpu, Hammer, ShieldAlert, Check, ShieldCheck } from 'lucide-react';
 
 export default function Services({ branchInfo, setActiveTab }) {
   
@@ -59,7 +59,9 @@ export default function Services({ branchInfo, setActiveTab }) {
       </div>
       
       <div className="service-guarantee glass">
-        <div className="guarantee-icon">🛡️</div>
+        <div className="guarantee-icon">
+          <ShieldCheck size={28} />
+        </div>
         <div className="guarantee-text">
           <h4>1 Yıl Parça ve İşçilik Garantisi</h4>
           <p>Servisimizde yapılan tüm tamir işlemlerinde kullanılan yedek parçalar ve işçiliğimiz 1 yıl / 20.000 km garanti kapsamındadır.</p>
