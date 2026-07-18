@@ -5920,10 +5920,226 @@
   box-shadow: 0 0 10px var(--primary-glow);
 }
 
-@media (max-width: 992px) {
-  .job-tracker-layout > div {
-    grid-template-columns: 1fr !important;
+/* ==========================================================================
+   HOME SERVICES SHOWCASE (1. GÖRSEL BİREBİR TASARIM)
+   ========================================================================== */
+.home-services-showcase {
+  padding: 36px 30px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  z-index: 1;
+  border: 1px solid var(--border-color);
+  background: rgba(10, 16, 26, 0.6);
+  backdrop-filter: blur(20px);
+}
+
+.showcase-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.showcase-badge {
+  color: #06b6d4;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.showcase-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.showcase-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.showcase-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .showcase-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
+}
+
+@media (max-width: 768px) {
+  .showcase-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.showcase-card {
+  padding: 24px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.showcase-card:hover {
+  transform: translateY(-6px);
+  border-color: #06b6d4;
+  background: rgba(6, 182, 212, 0.04);
+  box-shadow: 0 12px 30px rgba(6, 182, 212, 0.15);
+}
+
+.card-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #06b6d4;
+  margin-bottom: 16px;
+  background: rgba(6, 182, 212, 0.05);
+  transition: all 0.3s;
+}
+
+.showcase-card:hover .card-icon-wrapper {
+  background: #06b6d4;
+  color: #000;
+  border-color: #06b6d4;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+}
+
+.showcase-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.showcase-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+  flex-grow: 1;
+}
+
+.card-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #06b6d4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.2s;
+}
+
+.showcase-card:hover .card-link {
+  gap: 8px;
+  color: #22d3ee;
+}
+
+.showcase-trust-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 18px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+@media (max-width: 900px) {
+  .showcase-trust-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .showcase-trust-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trust-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trust-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: rgba(6, 182, 212, 0.08);
+  color: #06b6d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trust-bar-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.trust-bar-item span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.showcase-cta-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.showcase-cta-btn {
+  padding: 14px 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 25px rgba(6, 182, 212, 0.35);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.showcase-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
 }
 
 
