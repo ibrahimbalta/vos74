@@ -877,6 +877,24 @@ function App() {
     }
   };
 
+  const updateRepairCustomPartsCost = async (id, newCustomPartsCost) => {
+    const updated = activeRepairs.map(car => 
+      String(car.id) === String(id) ? { 
+        ...car, 
+        customPartsCost: newCustomPartsCost !== '' ? Number(newCustomPartsCost) : '' 
+      } : car
+    );
+    setActiveRepairs(updated);
+    const targetCar = updated.find(c => String(c.id) === String(id));
+    if (targetCar) {
+      try {
+        await setDoc(doc(db, "activeRepairs", String(id)), targetCar);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const updateRepairCustomerDemands = async (id, demands) => {
     const updated = activeRepairs.map(car => 
       String(car.id) === String(id) ? { 
@@ -969,7 +987,8 @@ function App() {
       jobsDone: targetCar.jobsDone || [],
       extraItems: targetCar.extraItems || [],
       laborCost: targetCar.laborCost || 0,
-      customTotalCost: targetCar.customTotalCost !== undefined ? targetCar.customTotalCost : ''
+      customTotalCost: targetCar.customTotalCost !== undefined ? targetCar.customTotalCost : '',
+      customPartsCost: targetCar.customPartsCost !== undefined ? targetCar.customPartsCost : ''
     };
 
     setActiveRepairs(activeRepairs.filter(c => String(c.id) !== String(id)));
@@ -1331,6 +1350,7 @@ function App() {
               updateRepairJobCost={updateRepairJobCost}
               updateRepairLaborCost={updateRepairLaborCost}
               updateRepairCustomTotalCost={updateRepairCustomTotalCost}
+              updateRepairCustomPartsCost={updateRepairCustomPartsCost}
               updateRepairCustomerDemands={updateRepairCustomerDemands}
               addPendingRequest={addPendingRequest}
               addActiveRepair={addActiveRepair}

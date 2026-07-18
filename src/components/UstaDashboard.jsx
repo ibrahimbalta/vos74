@@ -25,6 +25,7 @@ export default function UstaDashboard({
   updateRepairJobCost,
   updateRepairLaborCost,
   updateRepairCustomTotalCost,
+  updateRepairCustomPartsCost,
   updateRepairCustomerDemands,
   addPendingRequest, 
   addActiveRepair,
@@ -1139,6 +1140,22 @@ _Vos74 VAG Grubu Özel Servis_`;
                         style={{ flexGrow: 1, height: '36px', padding: '0 10px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', outline: 'none' }}
                       />
                     </div>
+                  </div>
+
+                  <div className="custom-parts-cost-input-row" style={{ marginTop: '12px' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Toptan Parça Ücreti (TL) (Opsiyonel)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        placeholder="Örn: 8500 (Boş bırakılırsa otomatik hesaplanır)"
+                        value={car.customPartsCost !== undefined && car.customPartsCost !== null ? car.customPartsCost : ''}
+                        onChange={(e) => updateRepairCustomPartsCost && updateRepairCustomPartsCost(car.id, e.target.value)}
+                        style={{ flexGrow: 1, height: '36px', padding: '0 10px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                      />
+                    </div>
+                    <small style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                      Girilirse servis fişinde parça toplamı otomatik hesaplanmak yerine direkt bu tutar basılır.
+                    </small>
                   </div>
 
                   <div className="custom-total-cost-input-row" style={{ marginTop: '12px' }}>
@@ -3602,9 +3619,11 @@ _Vos74 VAG Grubu Özel Servis_`;
                 .split('\n')
                 .map(line => line.trim())
                 .filter(line => line.length > 0);
-              const partsTotal = 
+              const calculatedPartsTotal = 
                 (printingCar.jobsDone ? printingCar.jobsDone.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
                 (printingCar.extraItems ? printingCar.extraItems.filter(j => !isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0);
+              const hasCustomPartsTotal = printingCar.customPartsCost !== undefined && printingCar.customPartsCost !== null && printingCar.customPartsCost !== '' && Number(printingCar.customPartsCost) >= 0;
+              const partsTotal = hasCustomPartsTotal ? Number(printingCar.customPartsCost) : calculatedPartsTotal;
               const laborTotal = 
                 (printingCar.laborCost || 0) +
                 (printingCar.jobsDone ? printingCar.jobsDone.filter(j => isLabor(j.name)).reduce((sum, j) => sum + (j.cost || 0), 0) : 0) +
