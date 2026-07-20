@@ -1001,7 +1001,11 @@ function App() {
     const jobsTotal = targetCar.jobsDone ? targetCar.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
     const extraTotal = targetCar.extraItems ? targetCar.extraItems.reduce((sum, j) => sum + (j.cost || 0), 0) : 0;
     const laborTotal = targetCar.laborCost || 0;
-    const computedTotal = jobsTotal + extraTotal + laborTotal;
+    const hasCustomPartsTotal = targetCar.customPartsCost !== undefined && targetCar.customPartsCost !== null && targetCar.customPartsCost !== '' && Number(targetCar.customPartsCost) >= 0;
+    const partsTotal = hasCustomPartsTotal
+      ? Number(targetCar.customPartsCost)
+      : (targetCar.parts ? targetCar.parts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0) : 0);
+    const computedTotal = jobsTotal + extraTotal + laborTotal + partsTotal;
     const totalCost = (targetCar.customTotalCost !== undefined && targetCar.customTotalCost !== '' && Number(targetCar.customTotalCost) > 0)
       ? Number(targetCar.customTotalCost)
       : computedTotal;

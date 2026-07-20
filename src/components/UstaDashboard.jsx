@@ -620,10 +620,20 @@ _Vos74 VAG Grubu Özel Servis_`;
   ];
 
   const getRepairTotalCost = (car) => {
+    if (!car) return 0;
+    const hasCustomTotal = car.customTotalCost !== undefined && car.customTotalCost !== null && car.customTotalCost !== '' && Number(car.customTotalCost) > 0;
+    if (hasCustomTotal) {
+      return Number(car.customTotalCost);
+    }
     const jobsCost = car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (Number(j.cost) || 0), 0) : 0;
     const extraCost = car.extraItems ? car.extraItems.reduce((sum, e) => sum + (Number(e.cost) || 0), 0) : 0;
     const laborCost = Number(car.laborCost) || 0;
-    const partsCost = car.parts ? car.parts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0) : 0;
+
+    const hasCustomPartsTotal = car.customPartsCost !== undefined && car.customPartsCost !== null && car.customPartsCost !== '' && Number(car.customPartsCost) >= 0;
+    const partsCost = hasCustomPartsTotal
+      ? Number(car.customPartsCost)
+      : (car.parts ? car.parts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.qty) || 1)), 0) : 0);
+
     return jobsCost + extraCost + laborCost + partsCost;
   };
 
@@ -1019,7 +1029,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                     </div>
                   </div>
                   <div className="price-tag-big text-gradient">
-                    {(car.jobsDone ? car.jobsDone.reduce((sum, j) => sum + (j.cost || 0), 0) : 0) + (car.extraItems ? car.extraItems.reduce((a, b) => a + b.cost, 0) : 0) + (car.laborCost || 0)} TL
+                    {getRepairTotalCost(car)} TL
                   </div>
                 </div>
 
