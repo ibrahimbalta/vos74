@@ -46,7 +46,7 @@ const initialBranchDetails = {
     subtitle: 'Bartın, Karabük ve Zonguldak bölgesindeki VAG grubu (Volkswagen, Audi, Seat, Skoda) araçlarınız için orijinal standartlarda şeffaf, garantili ve profesyonel özel servis hizmeti (Bartın Yeni Sanayi Sitesi).',
     themeClass: 'theme-general',
     services: [
-      { id: 'sg1', title: 'Periyodik Bakım', desc: 'Motor yağı, filtreler ve detaylı VAG grubu periyodik kontrol prosedürleri.', price: '1,500 - 3,500 TL' },
+      { id: 'sg1', title: 'Periyodik Bakım', desc: 'Motor yağı, filtreler ve detaylı VAG grubu periyodik kontrol prosedürleri.', price: '6,000 TL' },
       { id: 'sg2', title: 'Fren Bakım & Değişim', desc: 'Orijinal VAG onaylı disk ve balata değişimleri, hidrolik testi ve yenileme.', price: '1,200 - 2,500 TL' },
       { id: 'sg3', title: 'ODIS/VAG-COM Teşhis', desc: 'Orijinal bayi arıza tespit cihazlarıyla bilgisayarlı arıza teşhisi ve detaylı kodlama.', price: '500 - 1,500 TL' },
       { id: 'sg4', title: 'DSG Şanzıman Onarımı', desc: 'DSG mekatronik revizyonu, kavrama değişimi ve DSG kalibrasyon işlemleri.', price: 'Dinamik Fiyat' }
@@ -587,7 +587,17 @@ function App() {
           if (settings.beforeAfterData) setBeforeAfterData(settings.beforeAfterData);
           if (settings.workingHours) setWorkingHours(settings.workingHours);
           if (settings.team) setTeam(settings.team);
-          if (settings.branchDetails) setBranchDetails(settings.branchDetails);
+          if (settings.branchDetails) {
+            const bd = { ...settings.branchDetails };
+            if (bd.general && bd.general.services) {
+              const sg1 = bd.general.services.find(s => s.id === 'sg1' || s.title === 'Periyodik Bakım');
+              if (sg1 && sg1.price !== '6,000 TL') {
+                sg1.price = '6,000 TL';
+                updateDoc(doc(db, "settings", "general"), { branchDetails: bd }).catch(console.error);
+              }
+            }
+            setBranchDetails(bd);
+          }
           if (settings.campaigns) {
             setCampaigns(settings.campaigns);
           } else {
