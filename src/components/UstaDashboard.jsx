@@ -3,7 +3,7 @@ import {
   Calendar, Wrench, Plus, Check, X, Shield, PlusCircle, Trash, Search, 
   DollarSign, Package, Edit3, UserPlus, Image, MessageSquare, Settings2,
   Share2, FileText, Clock, Sparkles, Gift, CreditCard, ClipboardList,
-  Download, Upload, HardDrive, AlertTriangle, CheckCircle
+  Download, Upload, HardDrive, AlertTriangle, CheckCircle, MessageCircle, Send, Smartphone
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, writeBatch } from 'firebase/firestore';
@@ -96,6 +96,53 @@ export default function UstaDashboard({
   const [trackerStatusFilter, setTrackerStatusFilter] = useState('all');
   const [showAddPartForm, setShowAddPartForm] = useState(false);
   const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
+
+  // WhatsApp Customer Notification State
+  const [whatsappModalCar, setWhatsappModalCar] = useState(null);
+  const [customWhatsappText, setCustomWhatsappText] = useState('');
+
+  const buildWhatsAppStatusMessage = (car, customText) => {
+    if (customText) return customText;
+    if (!car) return '';
+
+    const owner = car.owner || 'Değerli Müşterimiz';
+    const plate = car.plate || 'Aracınız';
+    const model = car.model ? car.model.split('(')[0].trim() : 'aracınız';
+    const jobsDesc = (car.jobsDone && car.jobsDone.length > 0)
+      ? car.jobsDone.map(j => j.name).join(', ')
+      : (car.customerDemands || 'bakım ve onarım');
+    const delivery = car.deliveryTime || 'bugün içinde';
+
+    switch (car.status) {
+      case 'hazir':
+        return `Sayın ${owner}, ${plate} plakalı ${model} aracınızın ${jobsDesc} işlemi başarıyla tamamlanmıştır. Aracınızı ${delivery} itibarıyla servisimizden teslim alabilirsiniz. 🚗\n\nVOS74 Bartın VAG Grubu Özel Servis\n📍 Bartın Yeni Sanayi Sitesi\n📞 0532 637 39 78`;
+      case 'test':
+        return `Sayın ${owner}, ${plate} plakalı ${model} aracınızın onarım işlemleri tamamlanmış olup son test sürüşleri ve kontrol prosedürleri yapılmaktadır. 🛠️\n\nVOS74 Bartın VAG Grubu Özel Servis\n📍 Bartın Yeni Sanayi Sitesi\n📞 0532 637 39 78`;
+      case 'onarim':
+        return `Sayın ${owner}, ${plate} plakalı ${model} aracınızın atölyemizde ${jobsDesc} onarım işlemleri usta ekibimiz tarafından başlatılmıştır. 🔧\n\nVOS74 Bartın VAG Grubu Özel Servis\n📍 Bartın Yeni Sanayi Sitesi\n📞 0532 637 39 78`;
+      case 'ariza':
+        return `Sayın ${owner}, ${plate} plakalı ${model} aracınız ODIS arıza tespit cihazımıza bağlanmış ve detaylı teşhis kontrolleri yürütülmektedir. 💻\n\nVOS74 Bartın VAG Grubu Özel Servis\n📍 Bartın Yeni Sanayi Sitesi\n📞 0532 637 39 78`;
+      case 'kabul':
+      default:
+        return `Sayın ${owner}, ${plate} plakalı ${model} aracınız VOS74 Özel Servisimize kabul edilmiştir. Servis sürecinizi web sitemiz üzerinden canlı takip edebilirsiniz. 🚗\n\nVOS74 Bartın VAG Grubu Özel Servis\n📍 Bartın Yeni Sanayi Sitesi\n📞 0532 637 39 78`;
+    }
+  };
+
+  const sendWhatsAppStatusMessage = (car, overrideText) => {
+    if (!car) return;
+    const rawPhone = car.phone || '';
+    let cleanPhone = rawPhone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '90' + cleanPhone.substring(1);
+    } else if (!cleanPhone.startsWith('90')) {
+      cleanPhone = '90' + cleanPhone;
+    }
+    
+    const msgText = overrideText || buildWhatsAppStatusMessage(car, customWhatsappText);
+    const encodedText = encodeURIComponent(msgText);
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   // State for Add Listing form
   const [listingTitle, setListingTitle] = useState('');
@@ -1048,6 +1095,34 @@ _Vos74 VAG Grubu Özel Servis_`;
                         </button>
                       );
                     })}
+                  </div>
+                  
+                  {/* 1-Click WhatsApp Customer Notification Button */}
+                  <div style={{ marginTop: '12px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <button
+                      onClick={() => {
+                        setWhatsappModalCar(car);
+                        setCustomWhatsappText(buildWhatsAppStatusMessage(car));
+                      }}
+                      className="glow-btn"
+                      style={{
+                        background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 16px',
+                        fontSize: '0.82rem',
+                        fontWeight: 'bold',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(37, 211, 102, 0.35)'
+                      }}
+                    >
+                      <MessageCircle size={16} />
+                      <span>📲 Müşteriye WhatsApp Durum Mesajı Gönder</span>
+                    </button>
                   </div>
                 </div>
 
@@ -2191,19 +2266,45 @@ _Vos74 VAG Grubu Özel Servis_`;
                               </div>
                             </td>
                             <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                              <button
-                                onClick={() => setSelectedJobId(isSelected ? null : car.id)}
-                                className="glow-btn"
-                                style={{
-                                  padding: '4px 10px',
-                                  fontSize: '0.75rem',
-                                  background: isSelected ? 'var(--accent)' : 'var(--primary)',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                {isSelected ? 'Kapat' : 'Finans & Parça'}
-                              </button>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                  onClick={() => setSelectedJobId(isSelected ? null : car.id)}
+                                  className="glow-btn"
+                                  style={{
+                                    padding: '4px 10px',
+                                    fontSize: '0.75rem',
+                                    background: isSelected ? 'var(--accent)' : 'var(--primary)',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {isSelected ? 'Kapat' : 'Finans & Parça'}
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setWhatsappModalCar(car);
+                                    setCustomWhatsappText(buildWhatsAppStatusMessage(car));
+                                  }}
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '0.75rem',
+                                    background: 'rgba(37, 211, 102, 0.15)',
+                                    color: '#25D366',
+                                    border: '1px solid rgba(37, 211, 102, 0.3)',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontWeight: 'bold'
+                                  }}
+                                  title="Müşteriye WhatsApp Bildirimi Gönder"
+                                >
+                                  <MessageCircle size={13} />
+                                  <span>WhatsApp</span>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -4029,6 +4130,99 @@ _Vos74 VAG Grubu Özel Servis_`;
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Customer Notification Modal */}
+      {whatsappModalCar && (
+        <div className="modal-overlay" style={{ zIndex: 99999 }}>
+          <div className="modal-card glass" style={{ maxWidth: '540px', width: '90%', padding: '24px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '16px' }}>
+              <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#25D366' }}>
+                <MessageCircle size={20} />
+                <span>WhatsApp Müşteri Bildirimi</span>
+              </h4>
+              <button 
+                onClick={() => setWhatsappModalCar(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Müşteri:</span>
+                <strong style={{ color: '#fff' }}>{whatsappModalCar.owner}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Plaka / Araç:</span>
+                <strong style={{ color: 'var(--primary)' }}>{whatsappModalCar.plate} • {whatsappModalCar.model}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Telefon:</span>
+                <strong style={{ color: '#fff' }}>{whatsappModalCar.phone}</strong>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                Gönderilecek Şablon Mesaj (İstediğiniz gibi düzenleyebilirsiniz):
+              </label>
+              <textarea
+                rows="6"
+                value={customWhatsappText}
+                onChange={(e) => setCustomWhatsappText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border-color)',
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  color: '#fff',
+                  fontSize: '0.88rem',
+                  lineHeight: '1.5',
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setWhatsappModalCar(null)}
+                className="glow-btn-secondary"
+                style={{ padding: '10px 18px', borderRadius: '8px', fontSize: '0.85rem' }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={() => {
+                  sendWhatsAppStatusMessage(whatsappModalCar, customWhatsappText);
+                  setWhatsappModalCar(null);
+                }}
+                className="glow-btn"
+                style={{
+                  background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)'
+                }}
+              >
+                <Send size={16} />
+                <span>WhatsApp Uygulamasında Gönder</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
