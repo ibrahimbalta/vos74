@@ -368,6 +368,46 @@ const initialBlogs = [
     date: '14.07.2026',
     author: 'Kadir Gül Usta',
     category: 'Elektronik'
+  },
+  {
+    id: 'blog-13',
+    title: 'Bartın, Karabük ve Zonguldak’ta Nemli İklimin Araçlara Etkileri: Alt Takım, Fren ve Paslanma Rehberi',
+    summary: 'Batı Karadeniz bölgesindeki yüksek nem, yağış ve deniz suyunun araçların alt takımı, fren diskleri ve rot-balans sistemlerine etkileri ile Bartın, Karabük ve Zonguldak sürücüleri için koruyucu bakım ipuçları.',
+    content: 'Batı Karadeniz iklimi (Bartın, Karabük ve Zonguldak illeri), büyüleyici doğasının yanı sıra araç mekaniği ve kaportası üzerinde yıpratıcı etkilere sahiptir. Özellikle Bartın ve Zonguldak kıyı şeridindeki yüksek nem oranı, deniz tuzu serpintileri ve kış aylarında yollara dökülen tuz kimyasalları; araç alt takımında, şasi bağlantılarında ve fren sistemlerinde korozyon ile paslanmayı hızlandırır.\n\n1. Nemli İklimde Alt Takım ve Amortisör Aşınmaları:\nBartın ve Zonguldak\'ın virajlı ve nemli yollarında çalışan rot kollarında, rotillerde ve salıncak burçlarında zamanla gıcırtı ve boşluklar oluşur. Süspansiyon sistemindeki kauçuk burçlar nem ve çamur etkisiyle çatlar.\n\n2. Fren Diskleri ve Kaliper Sıkışması Riskleri:\nGece ve gündüz arasındaki nem farkı, fren disklerinin yüzeyinde pas tabakası oluşturur. Uzun süre yatırılan veya nemli ortamda parkedilen araçlarda fren kaliper piyonları kilitlenebilir, balata sürtünmesine ve yakıt tüketiminin artmasına neden olur.\n\n3. Karabük ve Çevresinde Toz-Nem Bileşimi ve Filtre Bakımı:\nKarabük sanayi ve coğrafi yapısı gereği havada yoğun partikül bulundurur. Bu toz nemle birleştiğinde hava ve polen filtrelerini kısa sürede tıkayarak motorun hava akışını bozar.\n\nBartın Yeni Sanayi Sitesi\'nde faaliyet gösteren Vos74 Özel Servisimizde; Bartın, Karabük ve Zonguldak illerinden gelen tüm marka ve model araçlara alt takım antipas koruma, rot-balans ayarı, fren disk torna ve kaliper bakımı hizmeti veriyoruz. Kadir Gül Usta liderliğindeki ekibimizle aracınızın alt takımını detaylı lifte kaldırarak kontrol ediyor, güvenli sürüş imkanı sunuyoruz. Bakım randevusu almak için vos74.com.tr sitemizi ziyaret edebilirsiniz.',
+    image: '/workshop_panorama.png',
+    date: '17.08.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Yürüyen Aksam'
+  },
+  {
+    id: 'blog-14',
+    title: 'Karabük ve Safranbolu Yokuşlarında Araç Bakımı: Debriyaj, Şanzıman ve Hararet Önlemleri',
+    summary: 'Karabük ve Safranbolu’nun dik rampa ve tarihi sokaklarında zorlanan debriyaj balatası, DSG/otomatik şanzıman ısınması ve hararet sorunlarının nedenleri ve tamir çözümleri.',
+    content: 'Karabük, Safranbolu ve çevresindeki coğrafi yapı; sürekli dik rampalar, keskin virajlar ve dur-kalk gerektiren yokuşlardan oluşur. Bu ağır yol şartları, araçların özellikle aktarma organları (debriyaj/şanzıman) ve motor soğutma sistemleri üzerinde ekstra yük oluşturur.\n\n1. Dik Yokuşlarda Debriyaj Balatası Yanması ve Aşınması:\nSafranbolu ve Karabük dik rampalarında yarım debriyajla kalkış yapmak balatanın aşırı ısınmasına, yanık kokusuna ve kaçırmasına yol açar. Vitese takılmasına rağmen aracın hızlanmaması (devirin artıp hızın artmaması) debriyajın bittiğini gösterir.\n\n2. DSG ve Otomatik Şanzıman Isınma Uyarısı (Gearbox Overheated):\nYokuş yukarı dur-kalk trafikte otomatik şanzıman sürekli 1. ve 2. vites arasında kararsız kalır. Mekatronik basıncı artar ve çift kavrama ısınarak arızaya geçer. Sıkışık rampada vitesi manuel moda almak veya S moda geçirmek şanzımanı korur.\n\n3. Hararet Yükselmesi ve Devridaim/Termostat Arızaları:\nDik yokuş tırmanırken çalışan motorun soğutma fanı veya devridaim pompası yetersiz kalırsa hararet göstergesi yükselir. Antifriz eksikliği veya termostat tıkanıklığı silindir kapak contasının yakılmasına neden olabilir.\n\nVos74 Bartın Özel Servis olarak; Bartın, Karabük, Safranbolu ve Zonguldak bölgesindeki tüm sürücülerimize garantili DSG mekatronik ve kavrama değişimi, manuel debriyaj baskı balata tamiri ve soğutma sistemi revizyonu sağlıyoruz. Usta Kadir Gül yönetimindeki teknik servisimizde bilgisayarlı arıza tespiti (ODIS) yapılmaktadır. Detaylı bilgi ve randevu için vos74.com.tr adresini ziyaret edebilirsiniz.',
+    image: '/hero_bg.png',
+    date: '17.08.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Şanzıman'
+  },
+  {
+    id: 'blog-15',
+    title: 'Zonguldak, Çaycuma ve Ereğli Sürücüleri İçin Dizel Araç Rehberi: DPF Tıkanıklığı ve EGR Arızaları',
+    summary: 'Zonguldak, Çaycuma ve Ereğli hatlarında dizel (TDI/HDI/dCi) araçlarda görülen DPF doluluğu, EGR valfi kirlenmesi, siyah duman ve çekiş düşüklüğü çözümleri.',
+    content: 'Zonguldak merkez, Çaycuma, Ereğli ve Devrek güzergahlarında yoğun kullanılan dizel araçlar, şehir içi kısa mesafe sürüşlerinde Dizel Partikül Filtresi (DPF) ve Egzoz Gazı Geri Döndürme (EGR) arızalarıyla sıkça karşılaşmaktadır. Kömür tozu, kısa mesafede motorun ısınmaması ve kalitesiz yakıt kullanımı bu filtrelerin tıkanmasını hızlandırır.\n\n1. DPF Tıkanıklığı Belirtileri ve Limp Mode (Koruma Modu):\nGösterge panelinde sarı DPF filtresi veya kızdırma bujisi sembolü yanıp sönüyorsa, araç çekişten düşer ve kendisini koruma moduna (limp mode) alır. Bu durumda araç 3000 deviri geçmez ve egzozdan koku veya duman yayabilir.\n\n2. EGR Valfi Kurumlanması ve Tekleme Sorunları:\nEGR valfi, egzoz gazını tekrar emme manifolduna göndererek emisyonu düşürür. Zonguldak ve çevresindeki kısa mesafe kullanımlarda EGR valfi kurumla kaplanır, takılı kalır ve aracın rölantide sallantılı çalışmasına veya teklemesine sebep olur.\n\n3. Profesyonel DPF ve EGR Temizleme (İptal Etmeden Çözüm):\nDPF filtresini veya EGR valfini iptal ettirmek muayeneden geçmeme ve egzoz kokusuna neden olur. Özel yıkama makinelerimiz ve kimyasallarımızla DPF kurum yükünü %0 seviyesine getiriyor, sökmeden yıkama ve ODIS rejenerasyonu uyguluyoruz.\n\nBartın, Karabük ve Zonguldak bölgesinde dizel motor uzmanlığı sunan Vos74 Özel Servisi; Kadir Gül Usta tecrübesiyle 1.6 TDI, 2.0 TDI ve tüm dizel araçlarda garantili DPF temizliği, EGR revizyonu ve enjektör bakımı gerçekleştirmektedir. Randevu kaydı için vos74.com.tr sitemizi kullanabilir, güvenle yola devam edebilirsiniz.',
+    image: '/after_engine.png',
+    date: '17.08.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Mekanik'
+  },
+  {
+    id: 'blog-16',
+    title: 'Bartın, Karabük ve Zonguldak’ta Bilgisayarlı Oto Arıza Tespiti (ODIS) ve Oto Elektrik Tamiri',
+    summary: 'Motor arıza lambası yanması, ABS/ESP beyin hataları, gizli özellik aktivasyonu ve ODIS bilgisayarlı arıza teşhisi ile Bartın, Karabük, Zonguldak oto elektrik çözümleri.',
+    content: 'Modern araçlar (Volkswagen, Audi, Seat, Skoda, BMW, Mercedes ve diğer tüm markalar) onlarca elektronik kontrol ünitesi (ECU/Beyin) ve sensör ağı ile donatılmıştır. Bartın, Karabük ve Zonguldak illerinde sürücülerin en çok karşılaştığı durumlardan biri motor arıza lambasının (Check Engine) aniden yanması veya ekranlarda elektronik hata mesajlarının çıkmasıdır.\n\n1. Motor Arıza Lambası Neden Yanar?\nEgzoz oksijen (lambda) sensörü, akışmetre (MAF), vuruntu sensörü veya ateşleme bobinlerindeki ufak bir sapma bile motor arıza lambasını yakabilir. Rastgele parça değiştirmek yerine bilgisayarlı orijinal arıza tespiti şarttır.\n\n2. ODIS ve Yetkili Servis Düzeyinde Teşhis:\nVos74 Bartın servisimizde kullanılan yetkili servis yazılımı ODIS (Offboard Diagnostic Information System) sayesinde, aracınızdaki hata kodları canlı verilerle analiz edilir. Kablo kopuklukları, beyin (ECU) hataları veya yazılım çakışmaları anında tespit edilir.\n\n3. Gizli Özellik Açma ve Modül Adaptasyonları:\nKarabük, Zonguldak ve Bartın araç sahipleri için VAG grubu araçlarda gizli özellik aktivasyonu (kadran selamlama, Amerikan park, korna ile kilit onayı, dönüşe duyarlı sis farı) ve yeni takılan akü, direksiyon kutusu, kelebek boğazı gibi parçaların adaptasyonu güvenle yapılmaktadır.\n\nOto elektrik, akü ölçümü, alternatör şarj dinamosu tamiri ve ECU beyin programlama ihtiyaçlarınızda Bartın Yeni Sanayi Sitesi\'ndeki Vos74 Bartın Özel Servisi hizmetinizdedir. Kadir Gül Usta ve uzman ekibimizle görüşmek ve randevu oluşturmak için vos74.com.tr adresini ziyaret edebilirsiniz.',
+    image: '/obd_bg.png',
+    date: '17.08.2026',
+    author: 'Kadir Gül Usta',
+    category: 'Elektronik'
   }
 ];
 
