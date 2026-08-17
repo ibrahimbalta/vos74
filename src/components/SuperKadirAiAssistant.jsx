@@ -17,9 +17,9 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
   const rotatingTips = [
     "Selam! Aracında garip bir ses mi var? Tıkla, teşhis edeyim! 🛠️",
     "DSG titremesi, DPF doluluğu, Hararet mi var? Bana sor! ⚡",
-    "Bartın, Karabük ve Zonguldak için 7/24 AI Arıza Asistanı! 🚗",
+    "Bartın, Karabük ve Zonguldak için 7/24 Vosmen AI Asistanı! 🚗",
     "Motor arıza lambası mı yandı? Hemen sorgulayalım! 💡",
-    "Tıkla, Süper Kadir Usta arızanı şıp diye bulsun! 🦸‍♂️"
+    "Tıkla, Vosmen AI arızanı şıp diye bulsun! 🦸‍♂️"
   ];
 
   // Initial welcome messages
@@ -27,7 +27,7 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
     {
       id: 1,
       sender: 'bot',
-      text: "Merhaba ben Süper Kadir Usta! 🖐️ VOS74 Yapay Zeka Arıza Asistanıyım. Aracındaki ses, arıza lambası veya şanzıman problemini bana sorabilir ya da aşağıdaki hızlı konulardan birini seçebilirsin!",
+      text: "Merhaba, ben Vosmen AI! 🖐️ VOS74 Yapay Zeka Arıza Asistanıyım. Aracındaki ses, arıza lambası veya şanzıman problemini bana sorabilir ya da aşağıdaki hızlı konulardan birini seçebilirsin!",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       options: [
         { label: "⚙️ DSG Vites Titriyor / Şanzıman Isınması", query: "DSG şanzımanımda titreme ve arıza uyarısı var" },
@@ -57,16 +57,14 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
     const flightInterval = setInterval(() => {
       if (!isOpen) {
         setIsFlying(true);
-        // Play superhero whoosh sound cue if audio context allows
         if (soundEnabled) {
           playWhooshSound();
         }
-        // Flight lasts for 6.5 seconds
         setTimeout(() => {
           setIsFlying(false);
         }, 6500);
       }
-    }, 25000); // Trigger flight every 25 seconds
+    }, 25000);
 
     return () => clearInterval(flightInterval);
   }, [isOpen, soundEnabled]);
@@ -83,7 +81,6 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
     return () => clearInterval(textInterval);
   }, []);
 
-  // Simple web audio API sound effects
   const playWhooshSound = () => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -98,9 +95,7 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.4);
-    } catch (e) {
-      // Audio context might be restricted before user gesture
-    }
+    } catch (e) {}
   };
 
   const playClickSound = () => {
@@ -206,7 +201,7 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
 
     // Default Fallback Intelligent Response
     return {
-      text: `Belirttiğiniz "${userQuery}" konusuyla ilgili Süper Kadir Usta teknik ekibimiz aracınızı incelemeye hazır! 🛠️\n\n` +
+      text: `Belirttiğiniz "${userQuery}" konusuyla ilgili Vosmen AI ve teknik ekibimiz aracınızı incelemeye hazır! 🛠️\n\n` +
         "VOS74 Özel Servisimizde bilgisayarlı ODIS diagnostik cihazı, uzman usta kadrosu ve orijinal yedek parçalarla Bartın, Karabük ve Zonguldak illerine garantili hizmet vermekteyiz.\n\n" +
         "Aracınızı atölyemize getirebilir veya WhatsApp hattımızdan direkt Kadir Usta ile görüşebilirsiniz.",
       action: { label: "📞 Kadir Usta ile Görüş (WhatsApp)", url: "https://wa.me/905326373978?text=Merhaba%20Kadir%20Usta,%20aracimla%20ilgili%20bilgi%20almak%20istiyorum" }
@@ -219,7 +214,6 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
 
     playClickSound();
 
-    // Add user message
     const userMsg = {
       id: Date.now(),
       sender: 'user',
@@ -231,7 +225,6 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
     if (!textToSend) setInputValue('');
     setIsTyping(true);
 
-    // AI Response simulation after typing delay
     setTimeout(() => {
       const responseData = generateDiagnosticResponse(query);
       const botMsg = {
@@ -273,17 +266,17 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
         <div 
           className="super-kadir-flying-banner-container"
           onClick={toggleWidget}
-          title="Süper Kadir Usta'ya tıkla, arızanı teşhis etsin!"
+          title="Vosmen AI'ya tıkla, arızanı teşhis etsin!"
         >
           <div className="flying-trail"></div>
           <div className="flying-speech-bubble">
-            <span className="zap-badge"><Zap size={14} /> AI CANLI</span>
-            <strong>Aracında arıza mı var? Tıkla, çözeyim! 🛠️</strong>
+            <span className="zap-badge"><Zap size={14} /> VOSMEN AI CANLI</span>
+            <strong>Aracında arıza mı var? Tıkla, Vosmen AI Çözsün! 🛠️</strong>
           </div>
           <div className="flying-avatar-wrapper">
             <img 
               src="/super_kadir.png" 
-              alt="Süper Kadir Usta Flying" 
+              alt="Vosmen AI Flying" 
               className="super-kadir-flying-img"
             />
             <div className="flying-aura"></div>
@@ -296,7 +289,7 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
         <div className="super-kadir-dock-wrapper">
           {/* Hover Speech Bubble */}
           <div className="super-kadir-speech-bubble" onClick={toggleWidget}>
-            <div className="bubble-badge"><Sparkles size={13} /> SÜPER KADİR AI</div>
+            <div className="bubble-badge"><Sparkles size={13} /> VOSMEN AI</div>
             <p>{speechBubbleText}</p>
             <span className="bubble-arrow"></span>
           </div>
@@ -305,13 +298,13 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
           <button 
             className="super-kadir-dock-btn"
             onClick={toggleWidget}
-            aria-label="Yapay Zeka Arıza Asistanını Aç"
+            aria-label="Vosmen AI Arıza Asistanını Aç"
           >
             <div className="avatar-pulse-ring"></div>
             <div className="avatar-glow-bg"></div>
             <img 
               src="/super_kadir.png" 
-              alt="Süper Kadir Usta 3D Avatar" 
+              alt="Vosmen AI 3D Avatar" 
               className="super-kadir-dock-img"
             />
             <span className="online-indicator-dot"></span>
@@ -326,11 +319,11 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
           <div className="chat-modal-header">
             <div className="header-left">
               <div className="header-avatar-box">
-                <img src="/super_kadir.png" alt="Süper Kadir Usta" className="header-avatar-img" />
+                <img src="/super_kadir.png" alt="Vosmen AI" className="header-avatar-img" />
                 <span className="header-status-dot"></span>
               </div>
               <div className="header-info">
-                <h3>Süper Kadir Usta AI <Sparkles size={16} className="inline-sparkle" /></h3>
+                <h3>Vosmen AI <Sparkles size={16} className="inline-sparkle" /></h3>
                 <span className="subtitle">7/24 Canlı Araç Arıza & Diagnostik Uzmanı</span>
               </div>
             </div>
@@ -361,7 +354,7 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
               <div key={msg.id} className={`message-row ${msg.sender}`}>
                 {msg.sender === 'bot' && (
                   <div className="msg-bot-avatar">
-                    <img src="/super_kadir.png" alt="Kadir Usta" />
+                    <img src="/super_kadir.png" alt="Vosmen AI" />
                   </div>
                 )}
                 
@@ -411,13 +404,13 @@ export default function SuperKadirAiAssistant({ setActiveTab }) {
             {isTyping && (
               <div className="message-row bot typing">
                 <div className="msg-bot-avatar">
-                  <img src="/super_kadir.png" alt="Kadir Usta" />
+                  <img src="/super_kadir.png" alt="Vosmen AI" />
                 </div>
                 <div className="msg-bubble typing-bubble">
                   <span className="dot"></span>
                   <span className="dot"></span>
                   <span className="dot"></span>
-                  <span className="typing-label">Süper Kadir Usta arızayı analiz ediyor...</span>
+                  <span className="typing-label">Vosmen AI arızayı analiz ediyor...</span>
                 </div>
               </div>
             )}
