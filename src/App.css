@@ -6307,6 +6307,8 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: transparent;
+  mix-blend-mode: multiply;
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.8));
   transform: scaleX(-1) rotate(-12deg);
   animation: flyingHeroBody 0.8s ease-in-out infinite alternate;
