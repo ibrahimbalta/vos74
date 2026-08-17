@@ -100,6 +100,7 @@ export default function UstaDashboard({
   // WhatsApp Customer Notification State
   const [whatsappModalCar, setWhatsappModalCar] = useState(null);
   const [customWhatsappText, setCustomWhatsappText] = useState('');
+  const [selectedStepForWhatsapp, setSelectedStepForWhatsapp] = useState('hazir');
 
   const buildWhatsAppStatusMessage = (car, customText) => {
     if (customText) return customText;
@@ -1102,6 +1103,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                     <button
                       onClick={() => {
                         setWhatsappModalCar(car);
+                        setSelectedStepForWhatsapp(car.status || 'hazir');
                         setCustomWhatsappText(buildWhatsAppStatusMessage(car));
                       }}
                       className="glow-btn"
@@ -2284,6 +2286,7 @@ _Vos74 VAG Grubu Özel Servis_`;
                                 <button
                                   onClick={() => {
                                     setWhatsappModalCar(car);
+                                    setSelectedStepForWhatsapp(car.status || 'hazir');
                                     setCustomWhatsappText(buildWhatsAppStatusMessage(car));
                                   }}
                                   style={{
@@ -4163,6 +4166,50 @@ _Vos74 VAG Grubu Özel Servis_`;
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Telefon:</span>
                 <strong style={{ color: '#fff' }}>{whatsappModalCar.phone}</strong>
+              </div>
+            </div>
+
+            {/* Step Template Selector Buttons */}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '8px' }}>
+                💬 Bildirim Adım Şablonunu Seçin (Tıklayarak Mesajı Değiştirin):
+              </label>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {steps.map((st) => {
+                  const isSelected = selectedStepForWhatsapp === st.val;
+                  return (
+                    <button
+                      key={st.val}
+                      type="button"
+                      onClick={() => {
+                        setSelectedStepForWhatsapp(st.val);
+                        const tempCar = { ...whatsappModalCar, status: st.val };
+                        setCustomWhatsappText(buildWhatsAppStatusMessage(tempCar));
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        fontSize: '0.78rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        border: isSelected ? '1px solid #25D366' : '1px solid rgba(255,255,255,0.1)',
+                        background: isSelected ? 'rgba(37, 211, 102, 0.2)' : 'rgba(255,255,255,0.05)',
+                        color: isSelected ? '#25D366' : 'var(--text-secondary)',
+                        transition: 'all 0.2s',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {st.val === 'kabul' && '🚗'}
+                      {st.val === 'ariza' && '💻'}
+                      {st.val === 'onarim' && '🔧'}
+                      {st.val === 'test' && '🛠️'}
+                      {st.val === 'hazir' && '✨'}
+                      <span>{st.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
