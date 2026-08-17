@@ -23,6 +23,7 @@ import Footer from './components/Footer';
 import CampaignPopup from './components/CampaignPopup';
 import CustomerCardGenerator from './components/CustomerCardGenerator';
 import GoogleReviewsWidget from './components/GoogleReviewsWidget';
+import SuperKadirAiAssistant from './components/SuperKadirAiAssistant';
 import './App.css';
 
 const defaultCampaigns = [
@@ -1491,6 +1492,9 @@ function App() {
 
       {/* Google Reviews Widget (Floating Badge & Drawer) */}
       <GoogleReviewsWidget />
+
+      {/* 3D Superhero Kadir Usta AI Assistant Widget */}
+      <SuperKadirAiAssistant setActiveTab={setActiveTab} />
 
       {/* Mobile Floating Action Buttons */}
       <div className="mobile-fab-container">
